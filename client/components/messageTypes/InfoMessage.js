@@ -34,7 +34,7 @@ export default function InfoMessage({ data }) {
             href={data.map_link}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center rounded-full bg-[#fe4200] px-3 py-1 text-[11px] font-semibold text-white transition hover:bg-[#e33b00]"
+            className="inline-flex items-center rounded-full border border-[#fe4200] px-3 py-1 text-[11px] font-semibold text-[#fe4200] transition hover:bg-[#fe4200]/10"
           >
             View on Maps
           </a>

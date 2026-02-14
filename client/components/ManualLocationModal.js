@@ -83,7 +83,7 @@ export default function ManualLocationModal({
           </button>
           <button
             type="button"
-            className="rounded-full bg-[#0076d7] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0066bb]"
+            className="rounded-full border border-[#0076d7] px-4 py-2 text-xs font-semibold text-[#0076d7] transition hover:bg-[#0076d7]/10"
             onClick={onConfirm}
           >
             Use location

@@ -387,7 +387,7 @@ export default function LocallyChatPage() {
                 </svg>
               </button>
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0076d7] text-white transition hover:bg-[#0066bb]"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#0076d7] text-[#0076d7] transition hover:bg-[#0076d7]/10"
                 type="button"
                 aria-label="Search"
               >
