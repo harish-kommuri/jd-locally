@@ -14,14 +14,23 @@ export default function LocallyChatArea() {
     setIsLoading(true);
 
     try {
-      // Replace with real API call when available.
-      const response = await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ chatId: Math.random().toString(16).slice(2, 10) });
-        }, 500);
+      const response = await fetch("/chat/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: "demo-user",
+          message: query
+        })
       });
 
-      router.push(`/locally/${response.chatId}`);
+      if (!response.ok) {
+        throw new Error("Failed to create chat");
+      }
+
+      const data = await response.json();
+      router.push(`/locally/${data.chat_id}`);
     } finally {
       setIsLoading(false);
     }
