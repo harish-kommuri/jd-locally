@@ -10,6 +10,7 @@ import GeoLocateMessage from "../../../components/messageTypes/GeoLocateMessage"
 import InfoMessage from "../../../components/messageTypes/InfoMessage";
 import ListMessage from "../../../components/messageTypes/ListMessage";
 import TextMessage from "../../../components/messageTypes/TextMessage";
+import UpdateMessage from "../../../components/messageTypes/UpdateMessage";
 
 const ConfirmationModal = dynamic(
   () => import("../../../components/ConfirmationModal"),
@@ -28,6 +29,12 @@ const chatMessages = [
     id: "c2",
     msg: "Hi, How can I help you Harish?",
     attachments: []
+  },
+  {
+    role: "system",
+    id: "c2a",
+    msg: "Fetching data",
+    type: "update"
   },
   {
     role: "user",
@@ -250,6 +257,7 @@ const formatPayload = (message) => {
 };
 
 const messageTitles = {
+  update: "Status",
   ask_location: "Location permission",
   address: "Address",
   list: "Nearby places",
@@ -299,60 +307,72 @@ export default function LocallyChatPage() {
             const payload = formatPayload(message);
 
             return (
-              <div
-                key={message.id}
-                className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                    isUser
-                      ? "bg-[#0076d7] text-white"
-                      : "border border-[#0076d7]/20 bg-white text-slate-900"
-                  }`}
-                >
-                  {message.type && (
-                    <p
-                      className={`mb-2 text-[11px] uppercase tracking-[0.2em] ${
-                        isUser ? "text-white/70" : "text-[#0076d7]"
+              <div key={message.id}>
+                {message.type === "update" ? (
+                  <div className="flex justify-center">
+                    <div className="w-full max-w-3xl">
+                      <UpdateMessage message={message.msg} />
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
+                        isUser
+                          ? "bg-[#0076d7] text-white"
+                          : "border border-[#0076d7]/20 bg-white text-slate-900"
                       }`}
                     >
-                      {messageTitles[message.type] ?? message.type}
-                    </p>
-                  )}
-                  {message.type === "list" && (
-                    <ListMessage items={message.data} />
-                  )}
-                  {message.type === "compare" && (
-                    <CompareMessage items={message.data} />
-                  )}
-                  {message.type === "geo_locate" && (
-                    <GeoLocateMessage data={message.data} />
-                  )}
-                  {message.type === "confirmation" && (
-                    <ConfirmationMessage
-                      message={message.data?.[0]?.msg}
-                      onSelect={() => setIsModalOpen(true)}
-                    />
-                  )}
-                  {message.type === "ask_location" && (
-                    <AskLocationMessage message={message.msg} />
-                  )}
-                  {message.type === "info" && (
-                    <InfoMessage data={message.data} />
-                  )}
-                  {payload &&
-                    message.type !== "list" &&
-                    message.type !== "compare" &&
-                    message.type !== "geo_locate" &&
-                    message.type !== "confirmation" &&
-                    message.type !== "ask_location" &&
-                    message.type !== "info" && <TextMessage text={payload} />}
-                  {message.attachments && message.attachments.length > 0 && (
-                    <p className="mt-2 text-xs text-white/70">
-                      {message.attachments.length} attachment(s)
-                    </p>
-                  )}
-                </div>
+                      {message.type && (
+                        <p
+                          className={`mb-2 text-[11px] uppercase tracking-[0.2em] ${
+                            isUser ? "text-white/70" : "text-[#0076d7]"
+                          }`}
+                        >
+                          {messageTitles[message.type] ?? message.type}
+                        </p>
+                      )}
+                      {message.type === "list" && (
+                        <ListMessage items={message.data} />
+                      )}
+                      {message.type === "compare" && (
+                        <CompareMessage items={message.data} />
+                      )}
+                      {message.type === "geo_locate" && (
+                        <GeoLocateMessage data={message.data} />
+                      )}
+                      {message.type === "confirmation" && (
+                        <ConfirmationMessage
+                          message={message.data?.[0]?.msg}
+                          onSelect={() => setIsModalOpen(true)}
+                        />
+                      )}
+                      {message.type === "ask_location" && (
+                        <AskLocationMessage message={message.msg} />
+                      )}
+                      {message.type === "info" && (
+                        <InfoMessage data={message.data} />
+                      )}
+                      {payload &&
+                        message.type !== "list" &&
+                        message.type !== "compare" &&
+                        message.type !== "geo_locate" &&
+                        message.type !== "confirmation" &&
+                        message.type !== "update" &&
+                        message.type !== "ask_location" &&
+                        message.type !== "info" && (
+                        <TextMessage text={payload} />
+                      )}
+                      {message.attachments && message.attachments.length > 0 && (
+                        <p className="mt-2 text-xs text-white/70">
+                          {message.attachments.length} attachment(s)
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
