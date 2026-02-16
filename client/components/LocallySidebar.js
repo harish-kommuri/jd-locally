@@ -1,26 +1,81 @@
+import Link from "next/link";
+
 import { useUser } from "../context/UserContext";
 
 export default function LocallySidebar() {
   const { user } = useUser();
   const chatHistory = user?.chats ?? [];
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : null;
 
   return (
     <aside className="sticky top-0 h-screen overflow-y-auto bg-slate-50 border-r border-[#0076d7]/20 px-5 py-6 flex flex-col gap-5">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap gap-1.5 text-xs uppercase tracking-[0.12em] text-slate-500">
-          <span className="font-semibold">Hitech City</span>
-          <span className="opacity-60">,</span>
-          <span>Hyderabad</span>
-          <span className="opacity-60">-</span>
-          <span>500081</span>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0076d7]/10 text-sm font-semibold text-[#0076d7]">
+              {initials}
+            </div>
+          ) : (
+            <img
+              src="https://via.placeholder.com/40"
+              alt="User placeholder"
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          )}
+          <div className="flex flex-col">
+            {user ? (
+              <span className="text-sm font-semibold text-slate-900">{user.name}</span>
+            ) : (
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-[#0076d7] transition hover:text-[#0066bb]"
+              >
+                Login
+              </Link>
+            )}
+            {user && (
+              <span className="text-xs text-slate-500">{user.id}</span>
+            )}
+          </div>
         </div>
         <div className="h-px bg-[#0076d7]/20" />
-        <button
-          className="rounded-xl border border-[#0076d7]/40 bg-[#0076d7]/10 px-4 py-3 text-left font-semibold text-[#0076d7] transition hover:bg-[#0076d7]/20"
-          type="button"
+        <div className="flex flex-col gap-1 text-xs uppercase tracking-[0.12em] text-slate-500">
+          <div className="flex flex-wrap gap-1.5">
+            <span className="font-semibold">Hitech City</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 opacity-60">
+            <span>Hyderabad</span>
+            <span className="">-</span>
+            <span>500081</span>
+          </div>
+        </div>
+        <div className="h-px bg-[#0076d7]/20" />
+        <Link
+          href="/locally/new"
+          className="flex items-center gap-2 px-1 text-sm font-semibold text-[#0076d7] transition hover:text-[#0066bb]"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+          >
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
           New chat
-        </button>
+        </Link>
         <div className="h-px bg-[#0076d7]/20" />
       </div>
       {user && (
