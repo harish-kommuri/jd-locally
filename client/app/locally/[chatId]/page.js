@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useParams } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import AskLocationMessage from "../../../components/messageTypes/AskLocationMessage";
 import CompareMessage from "../../../components/messageTypes/CompareMessage";
@@ -17,7 +18,7 @@ const ConfirmationModal = dynamic(
   { ssr: false }
 );
 
-const chatMessages = [
+const initialMessages = [
   {
     role: "user",
     id: "c1",
@@ -268,11 +269,18 @@ const messageTitles = {
 };
 
 export default function LocallyChatPage() {
+  const params = useParams();
+  const chatId = params?.chatId;
+  const [messages, setMessages] = useState(initialMessages);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBusinesses, setSelectedBusinesses] = useState([]);
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   const confirmationBusinesses = useMemo(() => {
-    const confirmation = chatMessages.find(
+    const confirmation = messages.find(
       (message) => message.type === "confirmation"
     );
 
@@ -281,7 +289,7 @@ export default function LocallyChatPage() {
     }
 
     return confirmation.data[0]?.list ?? [];
-  }, []);
+  }, [messages]);
 
   const toggleBusiness = (businessId) => {
     setSelectedBusinesses((prev) => {
@@ -297,12 +305,73 @@ export default function LocallyChatPage() {
     });
   };
 
+  const handleSend = async () => {
+    if (!input.trim() || isSending || !chatId) return;
+
+    setIsSending(true);
+
+    try {
+      const response = await fetch(`${apiBase}/chat/message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          user_id: "demo-user",
+          message: input
+        })
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to stream chat");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() || "";
+
+        chunks.forEach((chunk) => {
+          const line = chunk.trim();
+          if (!line.startsWith("data:")) return;
+
+          const jsonText = line.replace(/^data:\s*/, "");
+
+          try {
+            const event = JSON.parse(jsonText);
+            setMessages((prev) => [
+              ...prev,
+              {
+                ...event,
+                id: event.id || `evt-${Date.now()}-${Math.random()}`
+              }
+            ]);
+          } catch {
+            // ignore parse errors
+          }
+        });
+      }
+    } finally {
+      setIsSending(false);
+      setInput("");
+    }
+  };
+
   return (
     <section className="min-h-screen bg-white grid grid-cols-1 lg:grid-cols-[320px_1fr]">
       <LocallySidebar />
       <main className="flex w-full flex-col bg-[radial-gradient(circle_at_top,rgba(0,118,215,0.08),transparent_60%)] px-6 sm:px-10">
         <div className="mx-auto w-full max-w-3xl flex-1 space-y-4 py-10">
-          {chatMessages.map((message) => {
+          {messages.map((message) => {
             const isUser = message.role.toLowerCase() === "user";
             const payload = formatPayload(message);
 
@@ -384,6 +453,8 @@ export default function LocallyChatPage() {
                 className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
                 placeholder="Search businesses"
                 type="text"
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
               />
               <button
                 className="flex h-9 w-9 items-center justify-center rounded-full text-[#0076d7] transition hover:bg-[#0076d7]/10"
@@ -410,6 +481,8 @@ export default function LocallyChatPage() {
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-[#0076d7] text-[#0076d7] transition hover:bg-[#0076d7]/10"
                 type="button"
                 aria-label="Search"
+                onClick={handleSend}
+                disabled={isSending}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

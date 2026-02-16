@@ -1,5 +1,6 @@
 import os
 
+from bson import ObjectId
 from pymongo import MongoClient
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
@@ -12,7 +13,9 @@ _db = _client[DB_NAME]
 def create_chat_thread(user_id: str, message: str, current_location: dict | None = None):
     chat_doc = {
         "current_location": current_location or {},
-        "messages": [{"role": "user", "message": message}],
+        "messages": [
+            {"role": "user", "id": ObjectId(), "msg": message},
+        ],
     }
 
     chat_result = _db.chats.insert_one(chat_doc)
@@ -25,3 +28,17 @@ def create_chat_thread(user_id: str, message: str, current_location: dict | None
     )
 
     return chat_id
+
+
+def append_message(chat_id: str, role: str, msg: str, message_type: str | None = None):
+    message = {"role": role, "id": ObjectId(), "msg": msg}
+
+    if message_type:
+        message["type"] = message_type
+
+    _db.chats.update_one(
+        {"_id": ObjectId(chat_id)},
+        {"$push": {"messages": message}},
+    )
+
+    return message

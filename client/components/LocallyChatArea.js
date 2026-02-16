@@ -7,6 +7,7 @@ export default function LocallyChatArea() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   const createChat = async () => {
     if (!query.trim() || isLoading) return;
@@ -14,7 +15,7 @@ export default function LocallyChatArea() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/chat/create", {
+      const response = await fetch(`${apiBase}/chat/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
