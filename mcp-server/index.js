@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerCategoryTool } from "./routes/category.js";
 import { registerCompareTool } from "./routes/compare.js";
+import { registerBusinessDetailTool } from "./routes/business_detail.js";
 import { registerDistanceTool } from "./routes/distance.js";
 import { registerGeoTool } from "./routes/geo.js";
 import { registerInfoResource } from "./routes/info.js";
@@ -19,6 +20,7 @@ registerGeoTool(server);
 registerCategoryTool(server);
 registerCompareTool(server);
 registerDistanceTool(server);
+registerBusinessDetailTool(server);
 
 startHttpServer();
 

@@ -3,6 +3,7 @@ import express from "express";
 
 import { handleCategorySearch } from "./controllers/category_controller.js";
 import { handleCompare } from "./controllers/compare_controller.js";
+import { handleBusinessDetail } from "./controllers/business_detail_controller.js";
 import { handleDistance } from "./controllers/distance_controller.js";
 import { handleGeo } from "./controllers/geo_controller.js";
 import { handleInfo } from "./controllers/info_controller.js";
@@ -29,7 +30,8 @@ export function startHttpServer(port = process.env.MCP_HTTP_PORT || 4545) {
         "geo_lookup",
         "category_search",
         "compare_businesses",
-        "distance_between"
+        "distance_between",
+        "business_detail"
       ]
     });
   });
@@ -52,6 +54,10 @@ export function startHttpServer(port = process.env.MCP_HTTP_PORT || 4545) {
 
   app.post("/tools/distance_between", (req, res) => {
     res.json({ result: handleDistance(req.body ?? {}) });
+  });
+
+  app.post("/tools/business_detail", (req, res) => {
+    res.json({ result: handleBusinessDetail(req.body ?? {}) });
   });
 
   return app.listen(port, () => {
