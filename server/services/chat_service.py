@@ -42,3 +42,23 @@ def append_message(chat_id: str, role: str, msg: str, message_type: str | None =
     )
 
     return message
+
+
+def get_chat_thread(chat_id: str):
+    chat = _db.chats.find_one({"_id": ObjectId(chat_id)})
+
+    if not chat:
+        return None
+
+    messages = []
+    for message in chat.get("messages", []):
+        messages.append({
+            **message,
+            "id": str(message.get("id")) if message.get("id") else None,
+        })
+
+    return {
+        "chat_id": str(chat.get("_id")),
+        "current_location": chat.get("current_location", {}),
+        "messages": messages,
+    }

@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import Xhr from "../utils/xhr";
+
 export default function LocallyChatArea() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   const createChat = async () => {
     if (!query.trim() || isLoading) return;
@@ -15,15 +16,9 @@ export default function LocallyChatArea() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiBase}/chat/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          user_id: "demo-user",
-          message: query
-        })
+      const response = await Xhr.post("/chat/create", {
+        user_id: "demo-user",
+        message: query
       });
 
       if (!response.ok) {
@@ -75,7 +70,7 @@ export default function LocallyChatArea() {
             </svg>
           </button>
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#0076d7] text-[#0076d7] transition hover:bg-[#0076d7]/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#0076d7] transition hover:bg-[#0076d7]/10 disabled:cursor-not-allowed disabled:opacity-60"
             type="button"
             aria-label="Search"
             onClick={createChat}
@@ -91,8 +86,7 @@ export default function LocallyChatArea() {
               strokeLinejoin="round"
               className="h-4 w-4"
             >
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
+              <path d="M5 12l14-7-7 14-2.5-6z" />
             </svg>
           </button>
         </div>

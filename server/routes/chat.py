@@ -5,6 +5,7 @@ from controllers.chat_controller import (
     ChatCreateRequest,
     ChatMessageRequest,
     create_chat,
+    fetch_chat,
     stream_chat,
 )
 
@@ -19,3 +20,8 @@ def create_chat_route(payload: ChatCreateRequest):
 @router.post("/message")
 def create_chat_message(payload: ChatMessageRequest):
     return StreamingResponse(stream_chat(payload), media_type="text/event-stream")
+
+
+@router.get("/{chat_id}")
+def get_chat(chat_id: str):
+    return fetch_chat(chat_id)

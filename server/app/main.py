@@ -1,5 +1,10 @@
+import os
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from routes.assistant import router as assistant_router
 from routes.chat import router as chat_router

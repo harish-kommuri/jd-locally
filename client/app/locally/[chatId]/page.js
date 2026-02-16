@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
@@ -13,243 +13,14 @@ import ListMessage from "../../../components/messageTypes/ListMessage";
 import MediaMessage from "../../../components/messageTypes/MediaMessage";
 import TextMessage from "../../../components/messageTypes/TextMessage";
 import UpdateMessage from "../../../components/messageTypes/UpdateMessage";
+import Xhr from "../../../utils/xhr";
 
 const ConfirmationModal = dynamic(
   () => import("../../../components/ConfirmationModal"),
   { ssr: false }
 );
 
-const initialMessages = [
-  {
-    role: "user",
-    id: "c1",
-    msg: "Hi",
-    attachments: []
-  },
-  {
-    role: "system",
-    id: "c2",
-    msg: "Hi, How can I help you Harish?",
-    attachments: []
-  },
-  {
-    role: "system",
-    id: "c2a",
-    msg: "Fetching data",
-    type: "update"
-  },
-  {
-    role: "user",
-    id: "c3",
-    msg: "Show me the nearest restuarents"
-  },
-  {
-    role: "system",
-    id: "c4",
-    msg: "Please allow us to access your location or you can select manually.",
-    type: "ask_location"
-  },
-  {
-    role: "user",
-    id: "c5",
-    msg: "Hyderabad, Telangana",
-    type: "address"
-  },
-  {
-    role: "system",
-    id: "c6",
-    data: [
-      {
-        id: "r1",
-        name: "Spice Avenue",
-        ratings: "4.6",
-        reviews: "1,248",
-        established_on: "2012",
-        address: "Hitech City, Hyderabad",
-        distance: "1.2 km",
-        call: "+91 90000 10001",
-        deals: "10% off"
-      },
-      {
-        id: "r2",
-        name: "Urban Dine",
-        ratings: "4.4",
-        reviews: "982",
-        established_on: "2015",
-        address: "Kondapur, Hyderabad",
-        distance: "2.4 km",
-        call: "+91 90000 10002",
-        deals: "Free dessert"
-      },
-      {
-        id: "r3",
-        name: "Bistro 27",
-        ratings: "4.7",
-        reviews: "1,532",
-        established_on: "2010",
-        address: "Gachibowli, Hyderabad",
-        distance: "3.1 km",
-        call: "+91 90000 10003",
-        deals: "20% off"
-      }
-    ],
-    type: "list"
-  },
-  {
-    role: "user",
-    id: "c7",
-    msg: "Compare first and fourth restuarants"
-  },
-  {
-    role: "system",
-    id: "c8",
-    data: [
-      {
-        id: "r1",
-        name: "Spice Avenue",
-        ratings: "4.6",
-        reviews: "1,248",
-        established_on: "2012",
-        address: "Hitech City, Hyderabad",
-        distance: "1.2 km",
-        price: "₹₹"
-      },
-      {
-        id: "r3",
-        name: "Bistro 27",
-        ratings: "4.7",
-        reviews: "1,532",
-        established_on: "2010",
-        address: "Gachibowli, Hyderabad",
-        distance: "3.1 km",
-        price: "₹₹₹"
-      }
-    ],
-    type: "compare"
-  },
-  {
-    role: "user",
-    id: "c9",
-    msg: "How far is restuarant A from me / Chikkadapalli."
-  },
-  {
-    role: "system",
-    id: "c10",
-    data: {
-      msg: "Restaurant is 2.6KM from Chikkadapalli",
-      address: "18/1, 100 feet road, Kammanahalli, Kalyan Nagar, Bangalore - 560043",
-      map_link: "http://goo.gl/dcubisid"
-    },
-    type: "geo_locate"
-  },
-  {
-    role: "system",
-    id: "c10a",
-    type: "media"
-  },
-  {
-    role: "user",
-    id: "c11",
-    msg: "Can you comare the prices of Marriot hotel and Hilton hotels"
-  },
-  {
-    role: "system",
-    id: "c12",
-    data: [
-      {
-        msg: "4 Hitlon and 6 Marriot locations found. Please select to compare.",
-        list: [
-          {
-            id: "b1",
-            name: "Hilton Garden Inn",
-            location: "MG Road, Bengaluru"
-          },
-          {
-            id: "b2",
-            name: "Hilton Nagawara",
-            location: "Nagawara, Bengaluru"
-          },
-          {
-            id: "b3",
-            name: "Marriott MG Road",
-            location: "MG Road, Bengaluru"
-          },
-          {
-            id: "b4",
-            name: "Marriott Whitefield",
-            location: "Whitefield, Bengaluru"
-          },
-          {
-            id: "b5",
-            name: "Marriott Hebbal",
-            location: "Hebbal, Bengaluru"
-          },
-          {
-            id: "b6",
-            name: "Hilton Embassy Golf",
-            location: "Domlur, Bengaluru"
-          }
-        ]
-      }
-    ],
-    type: "confirmation"
-  },
-  {
-    role: "user",
-    id: "c13",
-    msg: "Marriot in MG road and Hitlon in Manayta, Nagawara"
-  },
-  {
-    role: "system",
-    id: "c14",
-    data: [
-      {
-        id: "h1",
-        name: "Marriott MG Road",
-        ratings: "4.5",
-        reviews: "2,410",
-        established_on: "2008",
-        address: "MG Road, Bengaluru",
-        distance: "2.9 km",
-        price: "₹₹₹₹"
-      },
-      {
-        id: "h2",
-        name: "Hilton Nagawara",
-        ratings: "4.4",
-        reviews: "1,980",
-        established_on: "2014",
-        address: "Nagawara, Bengaluru",
-        distance: "5.4 km",
-        price: "₹₹₹"
-      }
-    ],
-    type: "compare"
-  },
-  {
-    role: "user",
-    id: "c15",
-    msg: "Tell me more about Google office in Mahadevapura, Bangalore"
-  },
-  {
-    role: "system",
-    id: "c16",
-    type: "info",
-    data: {
-      id: "g1",
-      name: "Google Office",
-      ratings: "4.8",
-      reviews: "3,204",
-      established_on: "2008",
-      address: "Mahadevapura, Bengaluru",
-      distance: "6.2 km",
-      price: "N/A",
-      call: "+91 90000 10111",
-      deals: "N/A",
-      map_link: "https://maps.google.com"
-    }
-  }
-];
+const initialMessages = [];
 
 const formatPayload = (message) => {
   if (message.msg) {
@@ -284,7 +55,21 @@ export default function LocallyChatPage() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
 
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+  useEffect(() => {
+    if (!chatId) return;
+
+    const loadChat = async () => {
+      const response = await Xhr.get(`/chat/${chatId}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (Array.isArray(data.messages)) {
+        setMessages(data.messages);
+      }
+    };
+
+    loadChat();
+  }, [chatId]);
 
   const confirmationBusinesses = useMemo(() => {
     const confirmation = messages.find(
@@ -318,16 +103,10 @@ export default function LocallyChatPage() {
     setIsSending(true);
 
     try {
-      const response = await fetch(`${apiBase}/chat/message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          user_id: "demo-user",
-          message: input
-        })
+      const response = await Xhr.post("/chat/message", {
+        chat_id: chatId,
+        user_id: "demo-user",
+        message: input
       });
 
       if (!response.ok || !response.body) {
@@ -378,12 +157,12 @@ export default function LocallyChatPage() {
       <LocallySidebar />
       <main className="flex w-full flex-col bg-[radial-gradient(circle_at_top,rgba(0,118,215,0.08),transparent_60%)] px-6 sm:px-10">
         <div className="mx-auto w-full max-w-3xl flex-1 space-y-4 py-10">
-          {messages.map((message) => {
+          {messages.map((message, index) => {
             const isUser = message.role.toLowerCase() === "user";
             const payload = formatPayload(message);
 
             return (
-              <div key={message.id}>
+              <div key={message.id + "_" + (index + 1)}>
                 {message.type === "update" ? (
                   <div className="flex justify-center">
                     <div className="w-full max-w-3xl">
@@ -454,6 +233,11 @@ export default function LocallyChatPage() {
               </div>
             );
           })}
+          {messages.length === 0 && (
+            <div className="pt-8 text-center text-sm text-slate-500">
+              I can assist you with business information and comparisons. Give it a try.
+            </div>
+          )}
         </div>
         <div className="sticky bottom-0 left-0 right-0 bg-white/90 backdrop-blur">
           <div className="mx-auto w-full max-w-3xl py-4">
@@ -487,7 +271,7 @@ export default function LocallyChatPage() {
                 </svg>
               </button>
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#0076d7] text-[#0076d7] transition hover:bg-[#0076d7]/10"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-[#0076d7] transition hover:bg-[#0076d7]/10"
                 type="button"
                 aria-label="Search"
                 onClick={handleSend}
@@ -503,8 +287,7 @@ export default function LocallyChatPage() {
                   strokeLinejoin="round"
                   className="h-4 w-4"
                 >
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="M20 20l-3.5-3.5" />
+                  <path d="M5 12l14-7-7 14-2.5-6z" />
                 </svg>
               </button>
             </div>

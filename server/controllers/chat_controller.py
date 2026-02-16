@@ -3,7 +3,7 @@ from typing import Generator
 
 from pydantic import BaseModel
 
-from services.chat_service import append_message, create_chat_thread
+from services.chat_service import append_message, create_chat_thread, get_chat_thread
 from services.generative_ai_service import generate_response
 
 
@@ -45,3 +45,12 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     system_message = append_message(payload.chat_id, "system", response_text)
 
     yield f"data: {json.dumps({**system_message, 'id': str(system_message['id'])})}\n\n"
+
+
+def fetch_chat(chat_id: str):
+    chat = get_chat_thread(chat_id)
+
+    if not chat:
+        return {"chat_id": chat_id, "messages": []}
+
+    return chat
