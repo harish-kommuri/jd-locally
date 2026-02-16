@@ -1,4 +1,5 @@
 import "./globals.css";
+import { UserProvider } from "../context/UserContext";
 
 export const metadata = {
   title: "Client App",
@@ -9,9 +10,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen">
-          <main className="min-h-screen">{children}</main>
-        </div>
+        <UserProvider>
+          <div className="min-h-screen">
+            <main className="min-h-screen">{children}</main>
+          </div>
+        </UserProvider>
       </body>
     </html>
   );

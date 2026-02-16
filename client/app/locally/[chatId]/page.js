@@ -10,6 +10,7 @@ import ConfirmationMessage from "../../../components/messageTypes/ConfirmationMe
 import GeoLocateMessage from "../../../components/messageTypes/GeoLocateMessage";
 import InfoMessage from "../../../components/messageTypes/InfoMessage";
 import ListMessage from "../../../components/messageTypes/ListMessage";
+import MediaMessage from "../../../components/messageTypes/MediaMessage";
 import TextMessage from "../../../components/messageTypes/TextMessage";
 import UpdateMessage from "../../../components/messageTypes/UpdateMessage";
 
@@ -142,6 +143,11 @@ const initialMessages = [
     type: "geo_locate"
   },
   {
+    role: "system",
+    id: "c10a",
+    type: "media"
+  },
+  {
     role: "user",
     id: "c11",
     msg: "Can you comare the prices of Marriot hotel and Hilton hotels"
@@ -264,6 +270,7 @@ const messageTitles = {
   list: "Nearby places",
   compare: "Comparison",
   geo_locate: "Distance info",
+  media: "Media",
   confirmation: "Confirmation",
   info: "Business details"
 };
@@ -418,6 +425,7 @@ export default function LocallyChatPage() {
                           onSelect={() => setIsModalOpen(true)}
                         />
                       )}
+                      {message.type === "media" && <MediaMessage />}
                       {message.type === "ask_location" && (
                         <AskLocationMessage message={message.msg} />
                       )}
@@ -430,6 +438,7 @@ export default function LocallyChatPage() {
                         message.type !== "geo_locate" &&
                         message.type !== "confirmation" &&
                         message.type !== "update" &&
+                        message.type !== "media" &&
                         message.type !== "ask_location" &&
                         message.type !== "info" && (
                         <TextMessage text={payload} />
