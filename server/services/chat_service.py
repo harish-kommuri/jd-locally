@@ -62,3 +62,20 @@ def get_chat_thread(chat_id: str):
         "current_location": chat.get("current_location", {}),
         "messages": messages,
     }
+
+
+def get_chat_messages_for_llm(chat_id: str):
+    chat = _db.chats.find_one({"_id": ObjectId(chat_id)})
+
+    if not chat:
+        return []
+
+    llm_messages = []
+    for message in chat.get("messages", []):
+        if message.get("msg"):
+            llm_messages.append({
+                "role": message.get("role", "user"),
+                "content": message["msg"],
+            })
+
+    return llm_messages
