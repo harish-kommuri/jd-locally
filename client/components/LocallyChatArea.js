@@ -26,7 +26,7 @@ export default function LocallyChatArea() {
       }
 
       const data = await response.json();
-      router.push(`/locally/${data.chat_id}`);
+      router.push(`/locally/${data.chat_id}?init=1`);
     } finally {
       setIsLoading(false);
     }

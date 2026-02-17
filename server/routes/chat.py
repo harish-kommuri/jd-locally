@@ -4,9 +4,11 @@ from fastapi.responses import StreamingResponse
 from controllers.chat_controller import (
     ChatCreateRequest,
     ChatMessageRequest,
+    ChatRespondRequest,
     create_chat,
     fetch_chat,
     stream_chat,
+    stream_chat_response,
 )
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -20,6 +22,13 @@ def create_chat_route(payload: ChatCreateRequest):
 @router.post("/message")
 def create_chat_message(payload: ChatMessageRequest):
     return StreamingResponse(stream_chat(payload), media_type="text/event-stream")
+
+
+@router.post("/respond")
+def respond_to_chat(payload: ChatRespondRequest):
+    return StreamingResponse(
+        stream_chat_response(payload), media_type="text/event-stream"
+    )
 
 
 @router.get("/{chat_id}")
