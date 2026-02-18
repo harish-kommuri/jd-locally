@@ -22,41 +22,6 @@ const ConfirmationModal = dynamic(
 
 const initialMessages = [];
 
-const stripCodeBlock = (text) => {
-  if (typeof text !== "string") return text;
-
-  // Remove ```json ... ``` or ``` ... ``` wrapper
-  const codeBlockRegex = /^```(?:json)?\s*\n?([\s\S]*?)\n?```$/;
-  const match = text.trim().match(codeBlockRegex);
-
-  return match ? match[1].trim() : text;
-};
-
-const parseMessage = (message) => {
-  if (!message) return message;
-
-  // If msg is a JSON string, try to parse it
-  if (typeof message.msg === "string") {
-    const stripped = stripCodeBlock(message.msg.trim());
-
-    if (stripped.startsWith("{")) {
-      try {
-        const parsed = JSON.parse(stripped);
-        return {
-          ...message,
-          msg: parsed.msg || message.msg,
-          type: parsed.type || message.type,
-          data: parsed.data || message.data
-        };
-      } catch {
-        // Not valid JSON, return as-is
-      }
-    }
-  }
-
-  return message;
-};
-
 const formatPayload = (message) => {
   if (message.msg) {
     return message.msg;
@@ -108,7 +73,7 @@ export default function LocallyChatPage() {
         router.replace("/locally/new");
         return;
       }
-      setMessages(data.messages.map(parseMessage));
+      setMessages(data.messages);
     };
 
     loadChat();
@@ -167,11 +132,13 @@ export default function LocallyChatPage() {
         const jsonText = line.replace(/^data:\s*/, "");
         try {
           const event = JSON.parse(jsonText);
-          const parsed = parseMessage({
-            ...event,
-            id: event.id || `evt-${Date.now()}-${Math.random()}`
-          });
-          setMessages((prev) => [...prev, parsed]);
+          setMessages((prev) => [
+            ...prev,
+            {
+              ...event,
+              id: event.id || `evt-${Date.now()}-${Math.random()}`
+            }
+          ]);
         } catch {
           // ignore parse errors
         }

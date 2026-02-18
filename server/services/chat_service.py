@@ -1,6 +1,37 @@
 from bson import ObjectId
+import json
+import re
 
 from services.database_service import get_collection
+
+
+def _strip_code_block(text: str) -> str:
+    """Remove ```json ... ``` or ``` ... ``` wrapper from text."""
+    if not isinstance(text, str):
+        return text
+
+    pattern = r"^```(?:json)?\s*\n?([\s\S]*?)\n?```$"
+    match = re.match(pattern, text.strip())
+
+    return match.group(1).strip() if match else text
+
+
+def _parse_json_message(msg: str) -> dict | None:
+    """Try to parse msg as JSON, returns parsed dict or None."""
+    print(msg)
+    if not isinstance(msg, str):
+        return None
+
+    stripped = _strip_code_block(msg.strip())
+    print(stripped)
+
+    if stripped.startswith("{"):
+        try:
+            return json.loads(stripped)
+        except json.JSONDecodeError:
+            pass
+
+    return None
 
 
 def create_chat_thread(user_id: str, message: str, current_location: dict | None = None):
@@ -24,9 +55,21 @@ def create_chat_thread(user_id: str, message: str, current_location: dict | None
 
 
 def append_message(chat_id: str, role: str, msg: str, message_type: str | None = None):
-    message = {"role": role, "id": ObjectId(), "msg": msg}
+    message = {"role": role, "id": ObjectId()}
 
-    if message_type:
+    # Try to parse msg as JSON
+    parsed = _parse_json_message(msg)
+
+    if parsed:
+        message["msg"] = parsed.get("msg", msg)
+        if parsed.get("type"):
+            message["type"] = parsed["type"]
+        if parsed.get("data"):
+            message["data"] = parsed["data"]
+    else:
+        message["msg"] = msg
+
+    if message_type and "type" not in message:
         message["type"] = message_type
 
     get_collection("chats").update_one(
