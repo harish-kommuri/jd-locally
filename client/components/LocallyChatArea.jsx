@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import AskLocationMessage from "../components/messageTypes/AskLocationMessage";
 import CompareMessage from "../components/messageTypes/CompareMessage";
@@ -46,7 +46,6 @@ const messageTitles = {
 
 
 const LocallyChatArea = () => {
-    const searchParams = useSearchParams();
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
