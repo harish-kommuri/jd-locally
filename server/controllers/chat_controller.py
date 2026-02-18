@@ -9,7 +9,7 @@ from services.chat_service import (
     get_chat_messages_for_llm,
     get_chat_thread,
 )
-from services.generative_ai_service import generate_response
+from services.generative.llm import generate_response
 
 
 class ChatCreateRequest(BaseModel):
@@ -45,31 +45,34 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
         update = {
             "role": "system",
             "id": "update",
-            "msg": status,
+            "content": status,
             "type": "update",
         }
         yield f"data: {json.dumps(update)}\n\n"
 
     chat_messages = get_chat_messages_for_llm(payload.chat_id)
+    print(chat_messages)
     response_text = generate_response(chat_messages)
+    print(response_text)
     system_message = append_message(payload.chat_id, "system", response_text)
+    print(system_message)
 
     yield f"data: {json.dumps({**system_message, 'id': str(system_message['id'])})}\n\n"
 
 
 def stream_chat_response(payload: ChatRespondRequest) -> Generator[str, None, None]:
-    for status in [
-        "Thinking",
-        "Fetching data",
-        "Rendering View",
-    ]:
-        update = {
-            "role": "system",
-            "id": "update",
-            "msg": status,
-            "type": "update",
-        }
-        yield f"data: {json.dumps(update)}\n\n"
+    # for status in [
+    #     "Thinking",
+    #     "Fetching data",
+    #     "Rendering View",
+    # ]:
+    #     update = {
+    #         "role": "system",
+    #         "id": "update",
+    #         "msg": status,
+    #         "type": "update",
+    #     }
+    #     yield f"data: {json.dumps(update)}\n\n"
 
     chat_messages = get_chat_messages_for_llm(payload.chat_id)
     response_text = generate_response(chat_messages)

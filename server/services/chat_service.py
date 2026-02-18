@@ -1,13 +1,6 @@
-import os
-
 from bson import ObjectId
-from pymongo import MongoClient
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = os.getenv("MONGO_DB_NAME", "jd_locally")
-
-_client = MongoClient(MONGO_URI)
-_db = _client[DB_NAME]
+from services.database_service import get_collection
 
 
 def create_chat_thread(user_id: str, message: str, current_location: dict | None = None):
@@ -18,10 +11,10 @@ def create_chat_thread(user_id: str, message: str, current_location: dict | None
         ],
     }
 
-    chat_result = _db.chats.insert_one(chat_doc)
+    chat_result = get_collection("chats").insert_one(chat_doc)
     chat_id = chat_result.inserted_id
 
-    _db.users.update_one(
+    get_collection("users").update_one(
         {"user_id": user_id},
         {"$addToSet": {"chats": chat_id}},
         upsert=True,
@@ -36,7 +29,7 @@ def append_message(chat_id: str, role: str, msg: str, message_type: str | None =
     if message_type:
         message["type"] = message_type
 
-    _db.chats.update_one(
+    get_collection("chats").update_one(
         {"_id": ObjectId(chat_id)},
         {"$push": {"messages": message}},
     )
@@ -45,7 +38,7 @@ def append_message(chat_id: str, role: str, msg: str, message_type: str | None =
 
 
 def get_chat_thread(chat_id: str):
-    chat = _db.chats.find_one({"_id": ObjectId(chat_id)})
+    chat = get_collection("chats").find_one({"_id": ObjectId(chat_id)})
 
     if not chat:
         return None
@@ -65,7 +58,7 @@ def get_chat_thread(chat_id: str):
 
 
 def get_chat_messages_for_llm(chat_id: str):
-    chat = _db.chats.find_one({"_id": ObjectId(chat_id)})
+    chat = get_collection("chats").find_one({"_id": ObjectId(chat_id)})
 
     if not chat:
         return []

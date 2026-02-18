@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import AskLocationMessage from "../../../components/messageTypes/AskLocationMessage";
 import CompareMessage from "../../../components/messageTypes/CompareMessage";
@@ -49,6 +49,7 @@ const messageTitles = {
 export default function LocallyChatPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const chatId = params?.chatId;
   const [messages, setMessages] = useState(initialMessages);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,15 +64,20 @@ export default function LocallyChatPage() {
 
     const loadChat = async () => {
       const response = await Xhr.get(`/chat/${chatId}`);
-      if (!response.ok) return;
-      const data = await response.json();
-      if (Array.isArray(data.messages)) {
-        setMessages(data.messages);
+      if (!response.ok) {
+        router.replace("/locally/new");
+        return;
       }
+      const data = await response.json();
+      if (!data.messages || data.messages.length === 0) {
+        router.replace("/locally/new");
+        return;
+      }
+      setMessages(data.messages);
     };
 
     loadChat();
-  }, [chatId]);
+  }, [chatId, router]);
 
   const confirmationBusinesses = useMemo(() => {
     const confirmation = messages.find(

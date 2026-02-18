@@ -1,10 +1,16 @@
 import ollama
 
-from app.constants import SYSTEM_CONTEXT
+from constants.llm import SYSTEM_CONTEXT
+from services.generative.jd_mcp import get_tools
 
-MODEL_NAME = "mistral:22b"
+MODEL_NAME = "ministral-3:14b"
 TEMPERATURE = 0.4
 TOP_P = 0.9
+
+tools = get_tools()
+
+print(tools)
+
 
 
 def generate_response(messages: list[dict], system: str | None = None) -> str:
@@ -14,10 +20,15 @@ def generate_response(messages: list[dict], system: str | None = None) -> str:
     result = ollama.chat(
         model=MODEL_NAME,
         messages=payload,
+        tools=tools,
         options={
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
         },
     )
+
+    tool_calls = result["message"].get("tool_calls")
+    if tool_calls:
+        print("Tool calls:", tool_calls)
 
     return result["message"]["content"]
