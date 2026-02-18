@@ -1,4 +1,171 @@
+import { useState } from "react";
+
+import dynamic from "next/dynamic";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import AskLocationMessage from "../components/messageTypes/AskLocationMessage";
+import CompareMessage from "../components/messageTypes/CompareMessage";
+import ConfirmationMessage from "../components/messageTypes/ConfirmationMessage";
+import GeoLocateMessage from "../components/messageTypes/GeoLocateMessage";
+import InfoMessage from "../components/messageTypes/InfoMessage";
+import ListMessage from "../components/messageTypes/ListMessage";
+import MediaMessage from "../components/messageTypes/MediaMessage";
+import TextMessage from "../components/messageTypes/TextMessage";
+import UpdateMessage from "../components/messageTypes/UpdateMessage";
+
+import Xhr from "../utils/xhr";
+
+const ConfirmationModal = dynamic(
+    () => import("../components/ConfirmationModal"),
+    { ssr: false }
+);
+
+const formatPayload = (message) => {
+    if (message.msg) {
+        return message.msg;
+    }
+
+    if (message.data) {
+        return JSON.stringify(message.data, null, 2);
+    }
+
+    return "";
+};
+
+const messageTitles = {
+    update: "Status",
+    ask_location: "Location permission",
+    address: "Address",
+    list: "Nearby places",
+    compare: "Comparison",
+    geo_locate: "Distance info",
+    media: "Media",
+    confirmation: "Confirmation",
+    info: "Business details"
+};
+
+
 const LocallyChatArea = () => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedBusinesses, setSelectedBusinesses] = useState([]);
+    const [input, setInput] = useState("");
+    const [isSending, setIsSending] = useState(false);
+    const [messages, setMessages] = useState(initialMessages);
+
+    // const hasInitialized = useRef(false);
+
+    useEffect(() => {
+        if (!chatId) return; c
+
+        if (chatId === 'new') {
+            setMessages([]);
+            return;
+        }
+
+        const loadChat = async () => {
+            const response = await Xhr.get(`/chat/${chatId}`);
+            if (!response.ok) {
+                router.replace("/locally/new");
+                return;
+            }
+            const data = await response.json();
+            if (!data.messages || data.messages.length === 0) {
+                router.replace("/locally/new");
+                return;
+            }
+            setMessages(data.messages);
+        };
+
+        loadChat();
+    }, [chatId, router]);
+
+    const confirmationBusinesses = useMemo(() => {
+        const confirmation = messages.find(
+            (message) => message.type === "confirmation"
+        );
+
+        if (!confirmation || !Array.isArray(confirmation.data)) {
+            return [];
+        }
+
+        return confirmation.data[0]?.list ?? [];
+    }, [messages]);
+
+    const toggleBusiness = (businessId) => {
+        setSelectedBusinesses((prev) => {
+            if (prev.includes(businessId)) {
+                return prev.filter((id) => id !== businessId);
+            }
+
+            if (prev.length >= 5) {
+                return prev;
+            }
+
+            return [...prev, businessId];
+        });
+    };
+
+    const handleSend = async () => {
+        if (!input.trim() || isSending || !chatId) return;
+
+        setIsSending(true);
+
+        try {
+            await streamEvents("/chat/message", {
+                chat_id: chatId,
+                user_id: "demo-user",
+                message: input
+            });
+        } finally {
+            setIsSending(false);
+            setInput("");
+        }
+    };
+
+    const streamEvents = async (path, payload) => {
+        const response = await Xhr.post(path, payload);
+
+        if (!response.ok || !response.body) {
+            throw new Error("Failed to stream chat");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const chunks = buffer.split("\n\n");
+            buffer = chunks.pop() || "";
+
+            chunks.forEach((chunk) => {
+                const line = chunk.trim();
+                if (!line.startsWith("data:")) return;
+
+                const jsonText = line.replace(/^data:\s*/, "");
+                try {
+                    const event = JSON.parse(jsonText);
+                    setMessages((prev) => [
+                        ...prev,
+                        {
+                            ...event,
+                            id: event.id || `evt-${Date.now()}-${Math.random()}`
+                        }
+                    ]);
+                } catch {
+                    // ignore parse errors
+                }
+            });
+        }
+    };
+
+
     return (
         <>
             <main className="flex w-full flex-col bg-[radial-gradient(circle_at_top,rgba(0,118,215,0.08),transparent_60%)] px-6 sm:px-10">
@@ -21,8 +188,8 @@ const LocallyChatArea = () => {
                                     >
                                         <div
                                             className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${isUser
-                                                    ? "bg-[#0076d7] text-white"
-                                                    : "border border-[#0076d7]/20 bg-white text-slate-900"
+                                                ? "bg-[#0076d7] text-white"
+                                                : "border border-[#0076d7]/20 bg-white text-slate-900"
                                                 }`}
                                         >
                                             {message.type && (
