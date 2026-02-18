@@ -59,7 +59,7 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     yield f"data: {json.dumps({**system_message, 'id': str(system_message['id'])})}\n\n"
 
 
-def stream_chat_response(payload: ChatRespondRequest) -> Generator[str, None, None]:
+# def stream_chat_response(payload: ChatRespondRequest) -> Generator[str, None, None]:
     # for status in [
     #     "Thinking",
     #     "Fetching data",
@@ -73,11 +73,11 @@ def stream_chat_response(payload: ChatRespondRequest) -> Generator[str, None, No
     #     }
     #     yield f"data: {json.dumps(update)}\n\n"
 
-    chat_messages = get_chat_messages_for_llm(payload.chat_id)
-    response_text = generate_response(chat_messages)
-    system_message = append_message(payload.chat_id, "system", response_text)
+    # chat_messages = get_chat_messages_for_llm(payload.chat_id)
+    # response_text = generate_response(chat_messages)
+    # system_message = append_message(payload.chat_id, "system", response_text)
 
-    yield f"data: {json.dumps({**system_message, 'id': str(system_message['id'])})}\n\n"
+    # yield f"data: {json.dumps({**system_message, 'id': str(system_message['id'])})}\n\n"
 
 
 def fetch_chat(chat_id: str):

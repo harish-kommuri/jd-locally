@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import Xhr from "../utils/xhr";
 
-export default function LocallyChatArea() {
+export default function NewChat() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
