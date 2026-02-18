@@ -17,7 +17,7 @@ export default function LocallySidebar() {
     : null;
 
   return (
-    <aside className="sticky top-0 h-screen overflow-y-auto bg-slate-50 border-r border-[#0076d7]/20 px-5 py-6 flex flex-col gap-5">
+    <aside className="sticky max-w-[340px] top-0 h-screen overflow-y-auto bg-slate-50 border-r border-[#0076d7]/20 px-5 py-6 flex flex-col gap-5">
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           {user ? (

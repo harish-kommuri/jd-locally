@@ -22,6 +22,41 @@ const ConfirmationModal = dynamic(
 
 const initialMessages = [];
 
+const stripCodeBlock = (text) => {
+  if (typeof text !== "string") return text;
+
+  // Remove ```json ... ``` or ``` ... ``` wrapper
+  const codeBlockRegex = /^```(?:json)?\s*\n?([\s\S]*?)\n?```$/;
+  const match = text.trim().match(codeBlockRegex);
+
+  return match ? match[1].trim() : text;
+};
+
+const parseMessage = (message) => {
+  if (!message) return message;
+
+  // If msg is a JSON string, try to parse it
+  if (typeof message.msg === "string") {
+    const stripped = stripCodeBlock(message.msg.trim());
+
+    if (stripped.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(stripped);
+        return {
+          ...message,
+          msg: parsed.msg || message.msg,
+          type: parsed.type || message.type,
+          data: parsed.data || message.data
+        };
+      } catch {
+        // Not valid JSON, return as-is
+      }
+    }
+  }
+
+  return message;
+};
+
 const formatPayload = (message) => {
   if (message.msg) {
     return message.msg;
@@ -73,7 +108,7 @@ export default function LocallyChatPage() {
         router.replace("/locally/new");
         return;
       }
-      setMessages(data.messages);
+      setMessages(data.messages.map(parseMessage));
     };
 
     loadChat();
@@ -130,16 +165,13 @@ export default function LocallyChatPage() {
         if (!line.startsWith("data:")) return;
 
         const jsonText = line.replace(/^data:\s*/, "");
-
         try {
           const event = JSON.parse(jsonText);
-          setMessages((prev) => [
-            ...prev,
-            {
-              ...event,
-              id: event.id || `evt-${Date.now()}-${Math.random()}`
-            }
-          ]);
+          const parsed = parseMessage({
+            ...event,
+            id: event.id || `evt-${Date.now()}-${Math.random()}`
+          });
+          setMessages((prev) => [...prev, parsed]);
         } catch {
           // ignore parse errors
         }
@@ -179,7 +211,7 @@ export default function LocallyChatPage() {
   }, [chatId, searchParams]);
 
   return (
-    <section className="min-h-screen bg-white grid grid-cols-1 lg:grid-cols-[320px_1fr]">
+    <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
       <LocallySidebar />
       <main className="flex w-full flex-col bg-[radial-gradient(circle_at_top,rgba(0,118,215,0.08),transparent_60%)] px-6 sm:px-10">
         <div className="mx-auto w-full max-w-3xl flex-1 space-y-4 py-10">
@@ -237,17 +269,18 @@ export default function LocallyChatPage() {
                       {message.type === "info" && (
                         <InfoMessage data={message.data} />
                       )}
-                      {payload &&
-                        message.type !== "list" &&
-                        message.type !== "compare" &&
-                        message.type !== "geo_locate" &&
-                        message.type !== "confirmation" &&
-                        message.type !== "update" &&
-                        message.type !== "media" &&
-                        message.type !== "ask_location" &&
-                        message.type !== "info" && (
-                        <TextMessage text={payload} />
-                      )}
+                      {(!message.type ||
+                        ![
+                          "list",
+                          "compare",
+                          "geo_locate",
+                          "confirmation",
+                          "update",
+                          "media",
+                          "ask_location",
+                          "info"
+                        ].includes(message.type)) &&
+                        payload && <TextMessage text={payload} />}
                       {message.attachments && message.attachments.length > 0 && (
                         <p className="mt-2 text-xs text-white/70">
                           {message.attachments.length} attachment(s)
