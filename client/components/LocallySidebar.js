@@ -1,12 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { useUser } from "../context/UserContext";
+import Xhr from "../utils/xhr";
 
 export default function LocallySidebar() {
   const { user } = useUser();
-  const chatHistory = user?.chats ?? [];
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -15,6 +19,30 @@ export default function LocallySidebar() {
         .join("")
         .toUpperCase()
     : null;
+
+  useEffect(() => {
+    if (!user?.id) {
+      setChatHistory([]);
+      return;
+    }
+
+    const fetchChats = async () => {
+      setIsLoading(true);
+      try {
+        const response = await Xhr.get(`/chat/user/${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setChatHistory(data.chats ?? []);
+        }
+      } catch {
+        // ignore errors
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChats();
+  }, [user?.id]);
 
   return (
     <aside className="sticky max-w-[340px] top-0 h-screen overflow-y-auto bg-slate-50 border-r border-[#0076d7]/20 px-5 py-6 flex flex-col gap-5">
@@ -25,25 +53,33 @@ export default function LocallySidebar() {
               {initials}
             </div>
           ) : (
-            <img
-              src="https://via.placeholder.com/40"
-              alt="User placeholder"
-              className="h-10 w-10 rounded-full object-cover"
-            />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="h-5 w-5 text-slate-400"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
           )}
           <div className="flex flex-col">
             {user ? (
-              <span className="text-sm font-semibold text-slate-900">{user.name}</span>
+              <>
+                <span className="text-sm font-semibold text-slate-900">{user.name}</span>
+                <span className="text-xs text-slate-500">{user.id}</span>
+              </>
             ) : (
               <Link
                 href="/login"
                 className="text-sm font-semibold text-[#0076d7] transition hover:text-[#0066bb]"
               >
-                Login
+                Login to continue
               </Link>
-            )}
-            {user && (
-              <span className="text-xs text-slate-500">{user.id}</span>
             )}
           </div>
         </div>
@@ -80,21 +116,35 @@ export default function LocallySidebar() {
         </Link>
         <div className="h-px bg-[#0076d7]/20" />
       </div>
-      {user && (
+      {user ? (
         <div className="flex flex-col gap-3 flex-1">
           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
             History
           </p>
-          <ul className="m-0 p-0 list-none flex flex-col gap-2">
-            {chatHistory.map((chat) => (
-              <li key={chat.id} className="relative flex flex-col gap-1 px-1 py-2">
-                <span className="truncate text-sm font-semibold text-slate-900">
-                  {chat.title}
-                </span>
-                <span className="text-right text-xs text-slate-500">{chat.date}</span>
-              </li>
-            ))}
-          </ul>
+          {isLoading ? (
+            <p className="text-xs text-slate-400 px-1">Loading...</p>
+          ) : chatHistory.length === 0 ? (
+            <p className="text-xs text-slate-400 px-1">No chats yet</p>
+          ) : (
+            <ul className="m-0 p-0 list-none flex flex-col gap-1">
+              {chatHistory.map((chat) => (
+                <li key={chat.id}>
+                  <Link
+                    href={`/locally/${chat.id}`}
+                    className="block truncate rounded-lg px-2 py-2 text-sm text-slate-700 transition hover:bg-[#0076d7]/10 hover:text-[#0076d7]"
+                  >
+                    {chat.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 flex-1">
+          <p className="text-xs text-slate-400 px-1">
+            Login to view your chat history
+          </p>
         </div>
       )}
     </aside>

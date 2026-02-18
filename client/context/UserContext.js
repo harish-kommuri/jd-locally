@@ -5,15 +5,8 @@ import { createContext, useContext, useMemo, useState } from "react";
 const UserContext = createContext(null);
 
 const defaultUser = {
-  id: "user-001",
+  id: "demo-user",
   name: "Harish",
-  chats: [
-    { id: "chat-1", title: "Best biryani spots near me", date: "Feb 14" },
-    { id: "chat-2", title: "Top-rated gyms with trainers", date: "Feb 12" },
-    { id: "chat-3", title: "Late-night pharmacies open now", date: "Feb 10" },
-    { id: "chat-4", title: "Affordable coworking spaces", date: "Feb 08" },
-    { id: "chat-5", title: "Weekend farmer markets", date: "Feb 05" }
-  ]
 };
 
 export function UserProvider({ children }) {

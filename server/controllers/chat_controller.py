@@ -8,6 +8,7 @@ from services.chat_service import (
     create_chat_thread,
     get_chat_messages_for_llm,
     get_chat_thread,
+    get_user_chats,
 )
 from services.generative.llm import generate_response
 
@@ -86,3 +87,8 @@ def fetch_chat(chat_id: str):
         return {"chat_id": chat_id, "messages": []}
 
     return chat
+
+
+def fetch_user_chats(user_id: str):
+    chats = get_user_chats(user_id)
+    return {"chats": chats}

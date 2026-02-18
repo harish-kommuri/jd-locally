@@ -115,3 +115,23 @@ def get_chat_messages_for_llm(chat_id: str):
             })
 
     return llm_messages
+
+
+def get_user_chats(user_id: str):
+    user = get_collection("users").find_one({"user_id": user_id})
+
+    if not user or not user.get("chats"):
+        return []
+
+    chat_ids = user.get("chats", [])
+    chats = []
+
+    for idx, chat_id in enumerate(chat_ids):
+        chat = get_collection("chats").find_one({"_id": chat_id})
+        if chat:
+            chats.append({
+                "id": str(chat["_id"]),
+                "title": f"Chat - {idx + 1}",
+            })
+
+    return chats
