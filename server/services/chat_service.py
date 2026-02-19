@@ -39,8 +39,6 @@ def create_chat_thread(user_id: str, message: str):
         ],
     }
 
-    print(chat_doc)
-
     chat_result = get_collection("chats").insert_one(chat_doc)
     chat_id = chat_result.inserted_id
 

@@ -27,7 +27,7 @@ class ChatRespondRequest(BaseModel):
 
 
 def create_chat(payload: ChatCreateRequest):
-    chat_id = create_chat_thread(payload.user_id, payload.message)
+    chat_id = create_chat_thread(payload["user_id"], payload["message"])
     return {"chat_id": str(chat_id)}
 
 
@@ -36,15 +36,15 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     user_message = None
 
     if chatid == "new":
-        new_chat = create_chat({"user_id": payload["user_id"], "message": payload["message"]})
+        new_chat = create_chat({"user_id": payload.user_id, "message": payload.message})
         chatid = new_chat["chat_id"]
-        user_message = { "role": "user", "id": chatid, "content": payload["message"], "new": True }
+        user_message = { "role": "user", "id": chatid, "content": payload.message, "new": True }
     else:
-        user_message = append_message(payload.chat_id, "user", payload.message)
-
+        user_message = append_message(chatid, "user", payload.message)
+    
     yield f"data: {json.dumps({**user_message, 'id': str(user_message['id'])})}\n\n"
 
-    chat_messages = get_chat_messages_for_llm(payload.chat_id)
+    chat_messages = get_chat_messages_for_llm(chatid)
     response_text = generate_response(chat_messages)
     system_message = append_message(payload.chat_id, "system", response_text)
 

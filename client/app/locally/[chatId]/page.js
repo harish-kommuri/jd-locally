@@ -5,40 +5,28 @@ import { useParams } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
 import LocallyChatArea from "../../../components/LocallyChatArea";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addChatMessage } from "../../../store/slices/chatsSlice";
 import Xhr from "../../../utils/xhr";
+import { userSelector } from "../../../store/selectors";
 
 export default function LocallyChatPage() {
   const params = useParams();
   const chatId = params?.chatId;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = React.useState(false);
+  const user = useSelector(userSelector());
 
-  // useEffect(() => {
-  //   if (!chatId || hasInitialized.current !== false) return;
-
-  //   const shouldInit = searchParams?.get("init") === "1";
-  //   if (!shouldInit) return;
-
-  //   hasInitialized.current = true;
-  //   setIsSending(true);
-
-  //   streamEvents("/chat/respond", { chat_id: chatId })
-  //     .catch(() => {})
-  //     .finally(() => setIsSending(false));
-  // }, [chatId, searchParams]);
-
-  const sendPrompt = async (content = '') => {
+  const sendPrompt = async (message = '') => {
     try {
-      if (!content?.trim().length) { return; }
+      if (!message?.trim().length) { return; }
 
       setIsLoading(true);
 
       await streamEvents("/chat/message", {
         chat_id: chatId,
         user_id: user?.id,
-        message: input
+        message
       });
 
     } catch (e) {

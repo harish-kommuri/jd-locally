@@ -8,14 +8,14 @@ const defaultUser = {
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: defaultUser
+    data: defaultUser
   },
   reducers: {
     setUser(state, action) {
-      state.user = action.payload;
+      state.data = action.payload;
     },
     clearUser(state) {
-      state.user = null;
+      state.data = null;
     }
   }
 });
