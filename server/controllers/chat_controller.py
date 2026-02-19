@@ -50,7 +50,6 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
         yield f"data: {json.dumps(update)}\n\n"
 
     chat_messages = get_chat_messages_for_llm(payload.chat_id)
-    print(chat_messages)
     response_text = generate_response(chat_messages)
     system_message = append_message(payload.chat_id, "system", response_text)
 

@@ -10,6 +10,7 @@ export default function LocallyChatPage() {
   const params = useParams();
   const chatId = params?.chatId;
   const [messages, setMessages] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // useEffect(() => {
   //   if (!chatId || hasInitialized.current !== false) return;
@@ -25,13 +26,70 @@ export default function LocallyChatPage() {
   //     .finally(() => setIsSending(false));
   // }, [chatId, searchParams]);
 
-  console.log(messages);
+  const sendPrompt = async (msg = '') => {
+    try {
+      if (!msg?.trim().length) { return; }
+
+      setIsLoading(true);
+
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const streamEvents = async (path, payload) => {
+    const response = await Xhr.post(path, payload);
+
+    if (!response.ok || !response.body) {
+      throw new Error("Failed to stream chat");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const chunks = buffer.split("\n\n");
+      buffer = chunks.pop() || "";
+
+      chunks.forEach((chunk) => {
+        const line = chunk.trim();
+        if (!line.startsWith("data:")) return;
+
+        const jsonText = line.replace(/^data:\s*/, "");
+        try {
+          const event = JSON.parse(jsonText);
+          setMessages((prev) => [
+            ...prev,
+            {
+              ...event,
+              id: event.id || `evt-${Date.now()}-${Math.random()}`
+            }
+          ]);
+        } catch {
+          // ignore parse errors
+        }
+      });
+    }
+  };
+
+
 
   return (
     <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
       <LocallySidebar />
       {chatId === 'new' ? (
-        <NewChat />
+        <NewChat
+          isLoading={isLoading}
+          onPrompted={sendPrompt}
+        />
       ) : (
         <LocallyChatArea messages={messages} setMessages={setMessages} chatId={chatId} />
       )}

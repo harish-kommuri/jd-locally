@@ -14,6 +14,7 @@ import TextMessage from "../components/messageTypes/TextMessage";
 import UpdateMessage from "../components/messageTypes/UpdateMessage";
 
 import Xhr from "../utils/xhr";
+import PromptInput from "./PromptInput";
 
 const ConfirmationModal = dynamic(
     () => import("../components/ConfirmationModal"),
@@ -53,7 +54,6 @@ const LocallyChatArea = ({
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
-    const [input, setInput] = useState("");
     const [isSending, setIsSending] = useState(false);
 
     // const hasInitialized = useRef(false);
@@ -120,48 +120,6 @@ const LocallyChatArea = ({
             setInput("");
         }
     };
-
-    const streamEvents = async (path, payload) => {
-        const response = await Xhr.post(path, payload);
-
-        if (!response.ok || !response.body) {
-            throw new Error("Failed to stream chat");
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-            const { value, done } = await reader.read();
-
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const chunks = buffer.split("\n\n");
-            buffer = chunks.pop() || "";
-
-            chunks.forEach((chunk) => {
-                const line = chunk.trim();
-                if (!line.startsWith("data:")) return;
-
-                const jsonText = line.replace(/^data:\s*/, "");
-                try {
-                    const event = JSON.parse(jsonText);
-                    setMessages((prev) => [
-                        ...prev,
-                        {
-                            ...event,
-                            id: event.id || `evt-${Date.now()}-${Math.random()}`
-                        }
-                    ]);
-                } catch {
-                    // ignore parse errors
-                }
-            });
-        }
-    };
-
 
     return (
         <>
@@ -248,60 +206,7 @@ const LocallyChatArea = ({
                         </div>
                     )}
                 </div>
-                <div className="sticky bottom-0 left-0 right-0 bg-white/90 backdrop-blur">
-                    <div className="mx-auto w-full max-w-3xl py-4">
-                        <div className="flex w-full items-center gap-2 rounded-full border border-[#0076d7]/30 bg-white px-4 py-2 shadow-sm">
-                            <input
-                                className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                                placeholder="Search businesses"
-                                type="text"
-                                value={input}
-                                onChange={(event) => setInput(event.target.value)}
-                            />
-                            <button
-                                className="flex h-9 w-9 items-center justify-center rounded-full text-[#0076d7] transition hover:bg-[#0076d7]/10"
-                                type="button"
-                                aria-label="Voice search"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.6"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="h-4 w-4"
-                                >
-                                    <rect x="9" y="3" width="6" height="11" rx="3" />
-                                    <path d="M5 11a7 7 0 0 0 14 0" />
-                                    <path d="M12 18v3" />
-                                    <path d="M9 21h6" />
-                                </svg>
-                            </button>
-                            <button
-                                className="flex h-9 w-9 items-center justify-center rounded-full text-[#0076d7] transition hover:bg-[#0076d7]/10"
-                                type="button"
-                                aria-label="Search"
-                                onClick={handleSend}
-                                disabled={isSending}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.6"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="h-4 w-4"
-                                >
-                                    <path d="M5 12l14-7-7 14-2.5-6z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <PromptInput disabled={isSending} />
             </main>
             <ConfirmationModal
                 isOpen={isModalOpen}
