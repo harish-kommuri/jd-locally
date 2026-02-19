@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -15,6 +16,7 @@ import UpdateMessage from "../components/messageTypes/UpdateMessage";
 
 import Xhr from "../utils/xhr";
 import PromptInput from "./PromptInput";
+import { setChatMessages } from "../store/slices/chatsSlice";
 
 const ConfirmationModal = dynamic(
     () => import("../components/ConfirmationModal"),
@@ -47,11 +49,14 @@ const messageTitles = {
 
 
 const LocallyChatArea = ({
-    messages = [],
-    chatId,
-    setMessages = () => {}
+    chatId
 }) => {
     const router = useRouter();
+    const dispatch = useDispatch();
+    const messages = useSelector((state) =>
+        chatId ? state.chats.messagesByChatId[chatId] ?? [] : []
+    );
+    const user = useSelector((state) => state.user.user);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
     const [isSending, setIsSending] = useState(false);
@@ -70,23 +75,13 @@ const LocallyChatArea = ({
                 router.replace("/locally/new");
                 return;
             }
-            setMessages(data.messages);
+            dispatch(setChatMessages({ chatId, messages: data.messages }));
         };
 
-        loadChat();
-    }, [chatId]);
-
-    // const confirmationBusinesses = useMemo(() => {
-    //     const confirmation = messages.find(
-    //         (message) => message.type === "confirmation"
-    //     );
-
-    //     if (!confirmation || !Array.isArray(confirmation.data)) {
-    //         return [];
-    //     }
-
-    //     return confirmation.data[0]?.list ?? [];
-    // }, [messages]);
+        if (chatId) {
+            loadChat();
+        }
+    }, [chatId, dispatch, router]);
 
     const confirmationBusinesses = [];
 
@@ -112,7 +107,7 @@ const LocallyChatArea = ({
         try {
             await streamEvents("/chat/message", {
                 chat_id: chatId,
-                user_id: "demo-user",
+                user_id: user?.id,
                 message: input
             });
         } finally {

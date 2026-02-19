@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { useUser } from "../context/UserContext";
+import { useSelector } from "react-redux";
 import Xhr from "../utils/xhr";
 
 export default function LocallySidebar() {
-  const { user } = useUser();
+  const user = useSelector((state) => state.user.user);
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,5 +1,5 @@
 import "./globals.css";
-import { UserProvider } from "../context/UserContext";
+import ReduxProvider from "../providers/ReduxProvider";
 
 export const metadata = {
   title: "Client App",
@@ -10,11 +10,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <UserProvider>
+        <ReduxProvider>
           <div className="min-h-screen">
             <main className="min-h-screen">{children}</main>
           </div>
-        </UserProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -5,11 +5,14 @@ import { useParams } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
 import LocallyChatArea from "../../../components/LocallyChatArea";
+import { useDispatch } from "react-redux";
+import { addChatMessage } from "../../../store/slices/chatsSlice";
+import Xhr from "../../../utils/xhr";
 
 export default function LocallyChatPage() {
   const params = useParams();
   const chatId = params?.chatId;
-  const [messages, setMessages] = React.useState([]);
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = React.useState(false);
 
   // useEffect(() => {
@@ -66,13 +69,15 @@ export default function LocallyChatPage() {
         const jsonText = line.replace(/^data:\s*/, "");
         try {
           const event = JSON.parse(jsonText);
-          setMessages((prev) => [
-            ...prev,
-            {
-              ...event,
-              id: event.id || `evt-${Date.now()}-${Math.random()}`
-            }
-          ]);
+          dispatch(
+            addChatMessage({
+              chatId,
+              message: {
+                ...event,
+                id: event.id || `evt-${Date.now()}-${Math.random()}`
+              }
+            })
+          );
         } catch {
           // ignore parse errors
         }
@@ -91,7 +96,7 @@ export default function LocallyChatPage() {
           onPrompted={sendPrompt}
         />
       ) : (
-        <LocallyChatArea messages={messages} setMessages={setMessages} chatId={chatId} />
+        <LocallyChatArea chatId={chatId} />
       )}
     </section>
   );
