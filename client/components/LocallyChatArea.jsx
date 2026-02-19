@@ -47,21 +47,21 @@ const messageTitles = {
     info: "Business details"
 };
 
+const confirmationBusinesses = [];
 
 const LocallyChatArea = ({
-    chatId
+    chatId,
+    onPrompted = () => {},
+    isSending = false
 }) => {
     const router = useRouter();
     const dispatch = useDispatch();
     const messages = useSelector((state) =>
         chatId ? state.chats.messagesByChatId[chatId] ?? [] : []
     );
-    const user = useSelector((state) => state.user.user);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
-    const [isSending, setIsSending] = useState(false);
-
-    // const hasInitialized = useRef(false);
 
     useEffect(() => {
         const loadChat = async () => {
@@ -83,8 +83,6 @@ const LocallyChatArea = ({
         }
     }, [chatId, dispatch, router]);
 
-    const confirmationBusinesses = [];
-
     const toggleBusiness = (businessId) => {
         setSelectedBusinesses((prev) => {
             if (prev.includes(businessId)) {
@@ -97,23 +95,6 @@ const LocallyChatArea = ({
 
             return [...prev, businessId];
         });
-    };
-
-    const handleSend = async () => {
-        if (!input.trim() || isSending || !chatId) return;
-
-        setIsSending(true);
-
-        try {
-            await streamEvents("/chat/message", {
-                chat_id: chatId,
-                user_id: user?.id,
-                message: input
-            });
-        } finally {
-            setIsSending(false);
-            setInput("");
-        }
     };
 
     return (
@@ -201,7 +182,7 @@ const LocallyChatArea = ({
                         </div>
                     )}
                 </div>
-                <PromptInput disabled={isSending} />
+                <PromptInput disabled={isSending} onSubmit={onPrompted} />
             </main>
             <ConfirmationModal
                 isOpen={isModalOpen}

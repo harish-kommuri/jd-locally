@@ -35,10 +35,10 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     chatid = payload.chat_id
     user_message = None
 
-    if len(chatid) == 0:
+    if chatid == "new":
         new_chat = create_chat({"user_id": payload["user_id"], "message": payload["message"]})
         chatid = new_chat["chat_id"]
-        user_message = { "role": "user", "id": chatid, "content": payload["message"]}
+        user_message = { "role": "user", "id": chatid, "content": payload["message"], "new": True }
     else:
         user_message = append_message(payload.chat_id, "user", payload.message)
 

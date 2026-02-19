@@ -35,6 +35,12 @@ export default function LocallyChatPage() {
 
       setIsLoading(true);
 
+      await streamEvents("/chat/message", {
+        chat_id: chatId,
+        user_id: user?.id,
+        message: input
+      });
+
     } catch (e) {
       console.log(e);
     } finally {
@@ -69,6 +75,8 @@ export default function LocallyChatPage() {
         const jsonText = line.replace(/^data:\s*/, "");
         try {
           const event = JSON.parse(jsonText);
+          console.log(event);
+
           dispatch(
             addChatMessage({
               chatId,
@@ -85,8 +93,6 @@ export default function LocallyChatPage() {
     }
   };
 
-
-
   return (
     <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
       <LocallySidebar />
@@ -96,7 +102,7 @@ export default function LocallyChatPage() {
           onPrompted={sendPrompt}
         />
       ) : (
-        <LocallyChatArea chatId={chatId} />
+        <LocallyChatArea chatId={chatId} isSending={isLoading} onPrompted={sendPrompt} />
       )}
     </section>
   );
