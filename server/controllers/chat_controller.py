@@ -32,6 +32,14 @@ def create_chat(payload: ChatCreateRequest):
 
 
 def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
+    chatid = payload.chat_id
+    user_message = None
+
+    if len(chatid) == 0:
+        new_chat = create_chat({"user_id": payload["user_id"], "message": payload["message"]})
+        chatid = new_chat["chat_id"]
+        user_message = { "role": "user", "id": ""}
+
     user_message = append_message(payload.chat_id, "user", payload.message)
 
     yield f"data: {json.dumps({**user_message, 'id': str(user_message['id'])})}\n\n"
@@ -39,7 +47,6 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     for status in [
         "Thinking",
         "Fetching data",
-        "Rendering View",
     ]:
         update = {
             "role": "system",
@@ -65,7 +72,7 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     #     update = {
     #         "role": "system",
     #         "id": "update",
-    #         "msg": status,
+    #         "content": status,
     #         "type": "update",
     #     }
     #     yield f"data: {json.dumps(update)}\n\n"

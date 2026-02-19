@@ -9,7 +9,7 @@ export default function GeoLocateMessage({ data }) {
         <address className="not-italic text-sm text-slate-900">
           {data.address}
         </address>
-        <p className="mt-2 text-xs text-slate-500">{data.msg}</p>
+        <p className="mt-2 text-xs text-slate-500">{data.content}</p>
       </div>
       <a
         className="inline-flex items-center rounded-full border border-[#fe4200] px-4 py-2 text-xs font-semibold text-[#fe4200] transition hover:bg-[#fe4200]/10"

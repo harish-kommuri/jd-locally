@@ -22,8 +22,8 @@ const ConfirmationModal = dynamic(
 );
 
 const formatPayload = (message) => {
-    if (message.msg) {
-        return message.msg;
+    if (message.content) {
+        return message.content;
     }
 
     if (message.data) {
@@ -134,7 +134,7 @@ const LocallyChatArea = ({
                                 {message.type === "update" ? (
                                     <div className="flex justify-center">
                                         <div className="w-full max-w-3xl">
-                                            <UpdateMessage message={message.msg} />
+                                            <UpdateMessage message={message.content} />
                                         </div>
                                     </div>
                                 ) : (
@@ -166,13 +166,13 @@ const LocallyChatArea = ({
                                             )}
                                             {message.type === "confirmation" && (
                                                 <ConfirmationMessage
-                                                    message={message.data?.[0]?.msg}
+                                                    message={message.data?.[0]?.content}
                                                     onSelect={() => setIsModalOpen(true)}
                                                 />
                                             )}
                                             {message.type === "media" && <MediaMessage />}
                                             {message.type === "ask_location" && (
-                                                <AskLocationMessage message={message.msg} />
+                                                <AskLocationMessage message={message.content} />
                                             )}
                                             {message.type === "info" && (
                                                 <InfoMessage data={message.data} />

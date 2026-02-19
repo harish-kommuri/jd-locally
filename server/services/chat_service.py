@@ -16,14 +16,12 @@ def _strip_code_block(text: str) -> str:
     return match.group(1).strip() if match else text
 
 
-def _parse_json_message(msg: str) -> dict | None:
-    """Try to parse msg as JSON, returns parsed dict or None."""
-    print(msg)
-    if not isinstance(msg, str):
+def _parse_json_message(content: str) -> dict | None:
+    """Try to parse content as JSON, returns parsed dict or None."""
+    if not isinstance(content, str):
         return None
 
-    stripped = _strip_code_block(msg.strip())
-    print(stripped)
+    stripped = _strip_code_block(content.strip())
 
     if stripped.startswith("{"):
         try:
@@ -37,7 +35,7 @@ def _parse_json_message(msg: str) -> dict | None:
 def create_chat_thread(user_id: str, message: str):
     chat_doc = {
         "messages": [
-            {"role": "user", "id": ObjectId(), "msg": message},
+            {"role": "user", "id": ObjectId(), "content": message},
         ],
     }
 
@@ -55,20 +53,20 @@ def create_chat_thread(user_id: str, message: str):
     return chat_id
 
 
-def append_message(chat_id: str, role: str, msg: str, message_type: str | None = None):
+def append_message(chat_id: str, role: str, content: str, message_type: str | None = None):
     message = {"role": role, "id": ObjectId()}
 
-    # Try to parse msg as JSON
-    parsed = _parse_json_message(msg)
+    # Try to parse content as JSON
+    parsed = _parse_json_message(content)
 
     if parsed:
-        message["msg"] = parsed.get("msg", msg)
+        message["content"] = parsed.get("content", content)
         if parsed.get("type"):
             message["type"] = parsed["type"]
         if parsed.get("data"):
             message["data"] = parsed["data"]
     else:
-        message["msg"] = msg
+        message["content"] = content
 
     if message_type and "type" not in message:
         message["type"] = message_type
@@ -109,10 +107,10 @@ def get_chat_messages_for_llm(chat_id: str):
 
     llm_messages = []
     for message in chat.get("messages", []):
-        if message.get("msg"):
+        if message.get("content"):
             llm_messages.append({
                 "role": message.get("role", "user"),
-                "content": message["msg"],
+                "content": message["content"],
             })
 
     return llm_messages

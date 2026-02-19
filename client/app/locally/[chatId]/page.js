@@ -26,9 +26,9 @@ export default function LocallyChatPage() {
   //     .finally(() => setIsSending(false));
   // }, [chatId, searchParams]);
 
-  const sendPrompt = async (msg = '') => {
+  const sendPrompt = async (content = '') => {
     try {
-      if (!msg?.trim().length) { return; }
+      if (!content?.trim().length) { return; }
 
       setIsLoading(true);
 
