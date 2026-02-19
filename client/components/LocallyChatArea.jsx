@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 import AskLocationMessage from "../components/messageTypes/AskLocationMessage";
 import CompareMessage from "../components/messageTypes/CompareMessage";
@@ -46,23 +46,19 @@ const messageTitles = {
 
 
 const LocallyChatArea = () => {
+    const params = useParams();
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
     const [input, setInput] = useState("");
     const [isSending, setIsSending] = useState(false);
-    const [messages, setMessages] = useState(initialMessages);
+    const [messages, setMessages] = useState([]);
+
+    const chatId = params.chatId;
 
     // const hasInitialized = useRef(false);
 
     useEffect(() => {
-        if (!chatId) return; c
-
-        if (chatId === 'new') {
-            setMessages([]);
-            return;
-        }
-
         const loadChat = async () => {
             const response = await Xhr.get(`/chat/${chatId}`);
             if (!response.ok) {
@@ -78,19 +74,21 @@ const LocallyChatArea = () => {
         };
 
         loadChat();
-    }, [chatId, router]);
+    }, [chatId]);
 
-    const confirmationBusinesses = useMemo(() => {
-        const confirmation = messages.find(
-            (message) => message.type === "confirmation"
-        );
+    // const confirmationBusinesses = useMemo(() => {
+    //     const confirmation = messages.find(
+    //         (message) => message.type === "confirmation"
+    //     );
 
-        if (!confirmation || !Array.isArray(confirmation.data)) {
-            return [];
-        }
+    //     if (!confirmation || !Array.isArray(confirmation.data)) {
+    //         return [];
+    //     }
 
-        return confirmation.data[0]?.list ?? [];
-    }, [messages]);
+    //     return confirmation.data[0]?.list ?? [];
+    // }, [messages]);
+
+    const confirmationBusinesses = [];
 
     const toggleBusiness = (businessId) => {
         setSelectedBusinesses((prev) => {

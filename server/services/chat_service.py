@@ -129,9 +129,12 @@ def get_user_chats(user_id: str):
     for idx, chat_id in enumerate(chat_ids):
         chat = get_collection("chats").find_one({"_id": chat_id})
         if chat:
+            # Extract date from ObjectId (creation timestamp)
+            created_at = chat["_id"].generation_time
             chats.append({
                 "id": str(chat["_id"]),
                 "title": f"Chat - {idx + 1}",
+                "date": created_at.strftime("%b %d"),
             })
 
     return chats
