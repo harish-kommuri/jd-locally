@@ -8,6 +8,7 @@ const PromptInput = ({
 
     const handleSend = async () => {
         onSubmit(input);
+        setInput("");
     };
 
     return (
@@ -19,6 +20,11 @@ const PromptInput = ({
                         placeholder="Search businesses"
                         type="text"
                         value={input}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleSend();
+                            }
+                        }}
                         onChange={(event) => setInput(event.target.value)}
                     />
                     <button
