@@ -1,5 +1,5 @@
 import json
-from typing import Generator
+from typing import Generator, Optional
 from pydantic import BaseModel
 
 from services.chat_service import (
@@ -15,12 +15,10 @@ from services.generative.llm import generate_response
 class ChatCreateRequest(BaseModel):
     user_id: str
     message: str
-    current_location: dict | None
-
 
 class ChatMessageRequest(BaseModel):
     chat_id: str
-    user_id: str
+    user_id: str  
     message: str
 
 
@@ -29,7 +27,7 @@ class ChatRespondRequest(BaseModel):
 
 
 def create_chat(payload: ChatCreateRequest):
-    chat_id = create_chat_thread(payload.user_id, payload.message, payload.current_location)
+    chat_id = create_chat_thread(payload.user_id, payload.message)
     return {"chat_id": str(chat_id)}
 
 

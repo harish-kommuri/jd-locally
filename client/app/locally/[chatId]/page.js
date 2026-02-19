@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useParams } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
@@ -8,6 +9,7 @@ import LocallyChatArea from "../../../components/LocallyChatArea";
 export default function LocallyChatPage() {
   const params = useParams();
   const chatId = params?.chatId;
+  const [messages, setMessages] = React.useState([]);
 
   // useEffect(() => {
   //   if (!chatId || hasInitialized.current !== false) return;
@@ -23,13 +25,15 @@ export default function LocallyChatPage() {
   //     .finally(() => setIsSending(false));
   // }, [chatId, searchParams]);
 
+  console.log(messages);
+
   return (
     <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
       <LocallySidebar />
       {chatId === 'new' ? (
         <NewChat />
       ) : (
-        <LocallyChatArea />
+        <LocallyChatArea messages={messages} setMessages={setMessages} chatId={chatId} />
       )}
     </section>
   );

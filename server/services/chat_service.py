@@ -34,13 +34,14 @@ def _parse_json_message(msg: str) -> dict | None:
     return None
 
 
-def create_chat_thread(user_id: str, message: str, current_location: dict | None = None):
+def create_chat_thread(user_id: str, message: str):
     chat_doc = {
-        "current_location": current_location or {},
         "messages": [
             {"role": "user", "id": ObjectId(), "msg": message},
         ],
     }
+
+    print(chat_doc)
 
     chat_result = get_collection("chats").insert_one(chat_doc)
     chat_id = chat_result.inserted_id

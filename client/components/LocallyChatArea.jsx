@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import dynamic from "next/dynamic";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import AskLocationMessage from "../components/messageTypes/AskLocationMessage";
 import CompareMessage from "../components/messageTypes/CompareMessage";
@@ -45,16 +45,16 @@ const messageTitles = {
 };
 
 
-const LocallyChatArea = () => {
-    const params = useParams();
+const LocallyChatArea = ({
+    messages = [],
+    chatId,
+    setMessages = () => {}
+}) => {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
     const [input, setInput] = useState("");
     const [isSending, setIsSending] = useState(false);
-    const [messages, setMessages] = useState([]);
-
-    const chatId = params.chatId;
 
     // const hasInitialized = useRef(false);
 
