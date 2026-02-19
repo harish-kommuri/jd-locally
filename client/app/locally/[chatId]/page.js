@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
 import LocallyChatArea from "../../../components/LocallyChatArea";
@@ -12,6 +12,7 @@ import { userSelector } from "../../../store/selectors";
 
 export default function LocallyChatPage() {
   const params = useParams();
+  const router = useRouter();
   const chatId = params?.chatId;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -63,17 +64,20 @@ export default function LocallyChatPage() {
         const jsonText = line.replace(/^data:\s*/, "");
         try {
           const event = JSON.parse(jsonText);
-          console.log(event);
 
-          dispatch(
-            addChatMessage({
-              chatId,
-              message: {
-                ...event,
-                id: event.id || `evt-${Date.now()}-${Math.random()}`
-              }
-            })
-          );
+          if (event['new_chat'] === true) {
+            router.push("/locally/" + event.chat_id);
+          } else {
+            dispatch(
+              addChatMessage({
+                chatId: event.chat_id,
+                message: {
+                  ...event,
+                  id: event.id || `evt-${Date.now()}-${Math.random()}`
+                }
+              })
+            );
+          }
         } catch {
           // ignore parse errors
         }

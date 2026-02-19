@@ -38,17 +38,19 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     if chatid == "new":
         new_chat = create_chat({"user_id": payload.user_id, "message": payload.message})
         chatid = new_chat["chat_id"]
-        user_message = { "role": "user", "id": chatid, "content": payload.message, "new": True }
+        user_message = { "role": "user", "chat_id": chatid, "id": "", "new_chat": True }
     else:
         user_message = append_message(chatid, "user", payload.message)
     
-    yield f"data: {json.dumps({**user_message, 'id': str(user_message['id'])})}\n\n"
+    yield f"data: {json.dumps({**user_message, 'chat_id': chatid, 'id': str(user_message['id'])})}\n\n"
 
     chat_messages = get_chat_messages_for_llm(chatid)
-    response_text = generate_response(chat_messages)
-    system_message = append_message(payload.chat_id, "system", response_text)
+    # yield f"data: {json.dumps({"role": "system", "type": "update", "content": "Thinking"})}\n\n"
 
-    yield f"data: {json.dumps({**system_message, 'id': str(system_message['id'])})}\n\n"
+    response_text = generate_response(chat_messages)
+    system_message = append_message(chatid, "system", response_text)
+
+    yield f"data: {json.dumps({**system_message, 'chat_id': chatid, 'id': str(system_message['id'])})}\n\n"
 
 def fetch_chat(chat_id: str):
     chat = get_chat_thread(chat_id)
