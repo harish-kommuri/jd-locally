@@ -6,7 +6,7 @@ import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
 import LocallyChatArea from "../../../components/LocallyChatArea";
 import { useDispatch, useSelector } from "react-redux";
-import { addChatMessage, setTaskInProgress } from "../../../store/slices/chatsSlice";
+import { addChatMessage, setTaskInProgress, incrementChatListVersion } from "../../../store/slices/chatsSlice";
 import Xhr from "../../../utils/xhr";
 import { userSelector } from "../../../store/selectors";
 
@@ -71,6 +71,7 @@ export default function LocallyChatPage() {
             dispatch(setTaskInProgress({ chatId: event.chat_id, data: {} }));
 
             if (event['new_chat'] === true) {
+              dispatch(incrementChatListVersion());
               router.push("/locally/" + event.chat_id);
             } else {
               dispatch(

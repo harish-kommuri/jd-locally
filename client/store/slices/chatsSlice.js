@@ -4,9 +4,13 @@ const chatsSlice = createSlice({
   name: "chats",
   initialState: {
     messagesByChatId: {},
-    taskInProgress: {}
+    taskInProgress: {},
+    chatListVersion: 0
   },
   reducers: {
+    incrementChatListVersion(state) {
+      state.chatListVersion += 1;
+    },
     setChatMessages(state, action) {
       const { chatId, messages } = action.payload;
       state.messagesByChatId[chatId] = messages;
@@ -29,6 +33,6 @@ const chatsSlice = createSlice({
   }
 });
 
-export const { setChatMessages, addChatMessage, clearChatMessages, setTaskInProgress } = chatsSlice.actions;
+export const { setChatMessages, addChatMessage, clearChatMessages, setTaskInProgress, incrementChatListVersion } = chatsSlice.actions;
 
 export default chatsSlice.reducer;
