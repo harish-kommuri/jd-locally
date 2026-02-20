@@ -1,23 +1,10 @@
 import { handleGeo } from "../controllers/geo_controller.js";
+import { MCP_TOOL_SCHEMAS } from "../utils/mcp-schemas.js";
 
 export function registerGeoTool(server) {
   server.registerTool(
     "geo_lookup",
-    {
-      title: "Geo Lookup",
-      description: "Get geographical data for a location",
-      inputSchema: {
-        type: "object",
-        properties: {
-          area: { type: "string" },
-          city: { type: "string" },
-          pincode: { type: "string" },
-          lat: { type: "number" },
-          lng: { type: "number" }
-        },
-        required: []
-      }
-    },
+    MCP_TOOL_SCHEMAS.geo_lookup,
     async (payload) => ({
       content: [
         {

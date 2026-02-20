@@ -1,34 +1,10 @@
 import { handleDistance } from "../controllers/distance_controller.js";
+import { MCP_TOOL_SCHEMAS } from "../utils/mcp-schemas.js";
 
 export function registerDistanceTool(server) {
   server.registerTool(
     "distance_between",
-    {
-      title: "Distance Between",
-      description: "Calculate distance between two coordinates",
-      inputSchema: {
-        type: "object",
-        properties: {
-          from: {
-            type: "object",
-            properties: {
-              lat: { type: "number" },
-              lng: { type: "number" }
-            },
-            required: ["lat", "lng"]
-          },
-          to: {
-            type: "object",
-            properties: {
-              lat: { type: "number" },
-              lng: { type: "number" }
-            },
-            required: ["lat", "lng"]
-          }
-        },
-        required: ["from", "to"]
-      }
-    },
+    MCP_TOOL_SCHEMAS.distance_between,
     async (payload) => ({
       content: [
         {

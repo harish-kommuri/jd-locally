@@ -1,17 +1,9 @@
+import { MCP_TOOL_SCHEMAS } from "../utils/mcp-schemas.js";
+
 export function registerPingTool(server) {
   server.registerTool(
     "ping",
-    {
-      title: "Ping",
-      description: "Health check",
-      inputSchema: {
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        },
-        required: []
-      }
-    },
+    MCP_TOOL_SCHEMAS.ping,
     async (payload) => ({
       content: [
         {

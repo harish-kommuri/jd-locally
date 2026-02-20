@@ -1,7 +1,7 @@
 import ollama
 
 from constants.llm import SYSTEM_CONTEXT
-from services.generative.jd_mcp import get_tools
+from services.generative.jd_mcp import get_tools, ollama_tools
 
 MODEL_NAME = "ministral-3:14b"
 TEMPERATURE = 0.4
@@ -9,8 +9,9 @@ TOP_P = 0.9
 
 tools = get_tools()
 
-print(tools)
+llm_tools = ollama_tools(tools)
 
+print(llm_tools)
 
 
 def generate_response(messages: list[dict], system: str | None = None) -> str:

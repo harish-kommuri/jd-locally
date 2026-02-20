@@ -1,23 +1,10 @@
 import { handleCategorySearch } from "../controllers/category_controller.js";
+import { MCP_TOOL_SCHEMAS } from "../utils/mcp-schemas.js";
 
 export function registerCategoryTool(server) {
   server.registerTool(
     "category_search",
-    {
-      title: "Category Search",
-      description: "Search businesses by category with sorting options",
-      inputSchema: {
-        type: "object",
-        properties: {
-          category: { type: "string" },
-          sort_by: {
-            type: "string",
-            enum: ["most_rated", "cheapest", "nearest"]
-          }
-        },
-        required: []
-      }
-    },
+    MCP_TOOL_SCHEMAS.category_search,
     async (payload) => ({
       content: [
         {
