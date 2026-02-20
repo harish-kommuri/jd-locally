@@ -33,7 +33,11 @@ def _parse_json_message(content: str) -> dict | None:
 
 
 def create_chat_thread(user_id: str, message: str):
+    # Truncate message for chat name (max 50 chars)
+    chat_name = message[:50] + "..." if len(message) > 50 else message
+    
     chat_doc = {
+        "chat_name": chat_name,
         "messages": [
             {"role": "user", "id": ObjectId(), "content": message},
         ],
@@ -130,9 +134,11 @@ def get_user_chats(user_id: str):
         if chat:
             # Extract date from ObjectId (creation timestamp)
             created_at = chat["_id"].generation_time
+            chat_name = chat.get("chat_name") or f"Chat - {idx + 1}"
             chats.append({
                 "id": str(chat["_id"]),
-                "title": f"Chat - {idx + 1}",
+                "chat_name": chat_name,
+                "title": chat_name,
                 "date": created_at.strftime("%b %d"),
             })
 

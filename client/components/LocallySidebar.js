@@ -134,7 +134,7 @@ export default function LocallySidebar() {
                     href={`/locally/${chat.id}`}
                     className="flex items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-700 transition hover:bg-[#0076d7]/10 hover:text-[#0076d7]"
                   >
-                    <span className="truncate">{chat.title}</span>
+                    <span className="truncate">{chat.chat_name || chat.title}</span>
                     {chat.date && (
                       <span className="ml-2 shrink-0 text-xs text-slate-400">{chat.date}</span>
                     )}
