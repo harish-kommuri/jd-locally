@@ -5,9 +5,10 @@ import Link from "next/link";
 
 import { useSelector } from "react-redux";
 import Xhr from "../utils/xhr";
+import { userSelector } from "../store/selectors";
 
 export default function LocallySidebar() {
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector(userSelector());
   const chatListVersion = useSelector((state) => state.chats.chatListVersion);
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

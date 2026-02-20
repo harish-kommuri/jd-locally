@@ -1,4 +1,5 @@
 from bson import ObjectId
+from datetime import datetime
 import json
 import re
 
@@ -35,9 +36,13 @@ def _parse_json_message(content: str) -> dict | None:
 def create_chat_thread(user_id: str, message: str):
     # Truncate message for chat name (max 50 chars)
     chat_name = message[:50] + "..." if len(message) > 50 else message
+    now = datetime.utcnow()
     
     chat_doc = {
+        "user_id": user_id,
         "chat_name": chat_name,
+        "chat_created_on": now,
+        "chat_last_updated_on": now,
         "messages": [
             {"role": "user", "id": ObjectId(), "content": message},
         ],
@@ -67,8 +72,6 @@ def append_message(chat_id: str, role: str, content: str, message_type: str | No
             message["type"] = parsed["type"]
         if parsed.get("data"):
             message["data"] = parsed["data"]
-        if parsed.get('recommendations'):
-            message["recommendations"] = parsed['recommendations']
     else:
         message["content"] = content
 
@@ -77,7 +80,10 @@ def append_message(chat_id: str, role: str, content: str, message_type: str | No
 
     get_collection("chats").update_one(
         {"_id": ObjectId(chat_id)},
-        {"$push": {"messages": message}},
+        {
+            "$push": {"messages": message},
+            "$set": {"chat_last_updated_on": datetime.utcnow()}
+        },
     )
 
     return message
@@ -98,6 +104,10 @@ def get_chat_thread(chat_id: str):
 
     return {
         "chat_id": str(chat.get("_id")),
+        "user_id": chat.get("user_id"),
+        "chat_name": chat.get("chat_name"),
+        "chat_created_on": chat.get("chat_created_on").isoformat() if chat.get("chat_created_on") else None,
+        "chat_last_updated_on": chat.get("chat_last_updated_on").isoformat() if chat.get("chat_last_updated_on") else None,
         "current_location": chat.get("current_location", {}),
         "messages": messages,
     }
@@ -121,25 +131,23 @@ def get_chat_messages_for_llm(chat_id: str):
 
 
 def get_user_chats(user_id: str):
-    user = get_collection("users").find_one({"user_id": user_id})
-
-    if not user or not user.get("chats"):
-        return []
-
-    chat_ids = user.get("chats", [])
+    # Get all chats directly by user_id from chats collection
+    chat_cursor = get_collection("chats").find({"user_id": user_id}).sort("chat_last_updated_on", -1)
+    
     chats = []
-
-    for idx, chat_id in enumerate(chat_ids):
-        chat = get_collection("chats").find_one({"_id": chat_id})
-        if chat:
-            # Extract date from ObjectId (creation timestamp)
-            created_at = chat["_id"].generation_time
-            chat_name = chat.get("chat_name") or f"Chat - {idx + 1}"
-            chats.append({
-                "id": str(chat["_id"]),
-                "chat_name": chat_name,
-                "title": chat_name,
-                "date": created_at.strftime("%b %d"),
-            })
+    for idx, chat in enumerate(chat_cursor):
+        # Extract date from ObjectId (creation timestamp)
+        created_at = chat.get("chat_created_on") or chat["_id"].generation_time
+        updated_at = chat.get("chat_last_updated_on")
+        chat_name = chat.get("chat_name") or f"Chat - {idx + 1}"
+        chats.append({
+            "id": str(chat["_id"]),
+            "user_id": chat.get("user_id"),
+            "chat_name": chat_name,
+            "title": chat_name,
+            "chat_created_on": created_at.isoformat() if created_at else None,
+            "chat_last_updated_on": updated_at.isoformat() if updated_at else None,
+            "date": created_at.strftime("%b %d") if created_at else None,
+        })
 
     return chats

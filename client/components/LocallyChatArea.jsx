@@ -62,8 +62,6 @@ const LocallyChatArea = ({
         chatId ? state.chats.messagesByChatId[chatId] ?? [] : []
     );
 
-    console.log(messages);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
     const actionInProgress = useSelector((state) => state.chats.taskInProgress?.[chatId] || {});
@@ -162,22 +160,27 @@ const LocallyChatArea = ({
                                                 "ask_location",
                                                 "info"
                                             ].includes(message.type)) &&
-                                            payload && <TextMessage text={payload} />}
-                                        {message.recommendations && message.recommendations.length > 0 && (
-                                            <div className="mt-3 flex flex-wrap gap-2">
-                                                {message.recommendations.map((rec, idx) => (
-                                                    <button
-                                                        key={idx}
-                                                        type="button"
-                                                        onClick={() => onPrompted(rec)}
-                                                        disabled={isSending}
-                                                        className="rounded-full border border-[#0076d7] px-3 py-1.5 text-xs font-medium text-[#0076d7] transition hover:bg-[#0076d7]/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        {rec}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
+                                            payload ? (
+                                            <>
+                                                <TextMessage text={payload} />
+                                                {message.data && message.data.length > 0 && (
+                                                    <div className="mt-3 flex flex-wrap gap-2">
+                                                        {message.data.map((rec, idx) => (
+                                                            <button
+                                                                key={idx}
+                                                                type="button"
+                                                                onClick={() => onPrompted(rec)}
+                                                                disabled={isSending}
+                                                                className="rounded-full border border-[#0076d7] px-3 py-1.5 text-xs font-medium text-[#0076d7] transition hover:bg-[#0076d7]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {rec}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : null}
+
                                         {message.attachments && message.attachments.length > 0 && (
                                             <p className="mt-2 text-xs text-white/70">
                                                 {message.attachments.length} attachment(s)
