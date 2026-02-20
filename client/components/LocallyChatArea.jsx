@@ -55,7 +55,6 @@ const LocallyChatArea = ({
     chatId,
     onPrompted = () => { },
     isSending = false,
-    actionInProgress = {}
 }) => {
     const router = useRouter();
     const dispatch = useDispatch();
@@ -65,6 +64,7 @@ const LocallyChatArea = ({
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusinesses, setSelectedBusinesses] = useState([]);
+    const actionInProgress = useSelector((state) => state.chats.taskInProgress?.[chatId] || {});
 
     useEffect(() => {
         const loadChat = async () => {

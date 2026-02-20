@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const chatsSlice = createSlice({
   name: "chats",
   initialState: {
-    messagesByChatId: {}
+    messagesByChatId: {},
+    taskInProgress: {}
   },
   reducers: {
     setChatMessages(state, action) {
@@ -17,6 +18,10 @@ const chatsSlice = createSlice({
       }
       state.messagesByChatId[chatId].push(message);
     },
+    setTaskInProgress(state, action) {
+        const { chatId, data } = action.payload;
+        state.taskInProgress[chatId] = data || {};
+    },
     clearChatMessages(state, action) {
       const chatId = action.payload;
       delete state.messagesByChatId[chatId];
@@ -24,6 +29,6 @@ const chatsSlice = createSlice({
   }
 });
 
-export const { setChatMessages, addChatMessage, clearChatMessages } = chatsSlice.actions;
+export const { setChatMessages, addChatMessage, clearChatMessages, setTaskInProgress } = chatsSlice.actions;
 
 export default chatsSlice.reducer;

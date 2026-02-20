@@ -6,7 +6,7 @@ import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
 import LocallyChatArea from "../../../components/LocallyChatArea";
 import { useDispatch, useSelector } from "react-redux";
-import { addChatMessage } from "../../../store/slices/chatsSlice";
+import { addChatMessage, setTaskInProgress } from "../../../store/slices/chatsSlice";
 import Xhr from "../../../utils/xhr";
 import { userSelector } from "../../../store/selectors";
 
@@ -17,7 +17,6 @@ export default function LocallyChatPage() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = React.useState(false);
   const user = useSelector(userSelector());
-  const [actionInProgress, setActionInProgress] = React.useState({});
 
   const sendPrompt = async (message = '') => {
     try {
@@ -61,15 +60,16 @@ export default function LocallyChatPage() {
       chunks.forEach((chunk) => {
         const line = chunk.trim();
         if (!line.startsWith("data:")) return;
-
         const jsonText = line.replace(/^data:\s*/, "");
+
         try {
           const event = JSON.parse(jsonText);
 
-          if (event.type === 'update') {
-            setActionInProgress(event);
+          if (event.data?.type === 'update') {
+            dispatch(setTaskInProgress(event));
           } else {
-            setActionInProgress({});
+            dispatch(setTaskInProgress({ chatId: event.chat_id, data: {} }));
+
             if (event['new_chat'] === true) {
               router.push("/locally/" + event.chat_id);
             } else {
@@ -91,8 +91,6 @@ export default function LocallyChatPage() {
     }
   };
 
-  console.log(actionInProgress, { chatId });
-
   return (
     <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
       <LocallySidebar />
@@ -102,7 +100,7 @@ export default function LocallyChatPage() {
           onPrompted={sendPrompt}
         />
       ) : (
-        <LocallyChatArea chatId={chatId} isSending={isLoading} actionInProgress={actionInProgress} onPrompted={sendPrompt} />
+        <LocallyChatArea chatId={chatId} isSending={isLoading} onPrompted={sendPrompt} />
       )}
     </section>
   );
