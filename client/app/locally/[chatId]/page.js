@@ -17,6 +17,7 @@ export default function LocallyChatPage() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = React.useState(false);
   const user = useSelector(userSelector());
+  const [actionInProgress, setActionInProgress] = React.useState({});
 
   const sendPrompt = async (message = '') => {
     try {
@@ -65,18 +66,23 @@ export default function LocallyChatPage() {
         try {
           const event = JSON.parse(jsonText);
 
-          if (event['new_chat'] === true) {
-            router.push("/locally/" + event.chat_id);
+          if (event.type === 'update') {
+            setActionInProgress(event);
           } else {
-            dispatch(
-              addChatMessage({
-                chatId: event.chat_id,
-                message: {
-                  ...event,
-                  id: event.id || `evt-${Date.now()}-${Math.random()}`
-                }
-              })
-            );
+            setActionInProgress({});
+            if (event['new_chat'] === true) {
+              router.push("/locally/" + event.chat_id);
+            } else {
+              dispatch(
+                addChatMessage({
+                  chatId: event.chat_id,
+                  message: {
+                    ...event,
+                    id: event.id || `evt-${Date.now()}-${Math.random()}`
+                  }
+                })
+              );
+            }
           }
         } catch {
           // ignore parse errors
@@ -84,6 +90,8 @@ export default function LocallyChatPage() {
       });
     }
   };
+
+  console.log(actionInProgress, { chatId });
 
   return (
     <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
@@ -94,7 +102,7 @@ export default function LocallyChatPage() {
           onPrompted={sendPrompt}
         />
       ) : (
-        <LocallyChatArea chatId={chatId} isSending={isLoading} onPrompted={sendPrompt} />
+        <LocallyChatArea chatId={chatId} isSending={isLoading} actionInProgress={actionInProgress} onPrompted={sendPrompt} />
       )}
     </section>
   );

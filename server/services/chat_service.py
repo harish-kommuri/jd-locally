@@ -63,6 +63,8 @@ def append_message(chat_id: str, role: str, content: str, message_type: str | No
             message["type"] = parsed["type"]
         if parsed.get("data"):
             message["data"] = parsed["data"]
+        if parsed.get('recommandations'):
+            message["recommandataions"] = parsed['recommandations']
     else:
         message["content"] = content
 

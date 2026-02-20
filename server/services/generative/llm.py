@@ -21,7 +21,7 @@ def generate_response(messages: list[dict], system: str | None = None) -> str:
     result = ollama.chat(
         model=MODEL_NAME,
         messages=payload,
-        tools=tools,
+        # tools=tools,
         options={
             "temperature": TEMPERATURE,
             "top_p": TOP_P,

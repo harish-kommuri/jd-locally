@@ -45,7 +45,7 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
     yield f"data: {json.dumps({**user_message, 'chat_id': chatid, 'id': str(user_message['id'])})}\n\n"
 
     chat_messages = get_chat_messages_for_llm(chatid)
-    # yield f"data: {json.dumps({"role": "system", "type": "update", "content": "Thinking"})}\n\n"
+    yield f"data: {json.dumps({'role': 'system', 'type': 'update', 'content': 'Thinking'})}\n\n"
 
     response_text = generate_response(chat_messages)
     system_message = append_message(chatid, "system", response_text)

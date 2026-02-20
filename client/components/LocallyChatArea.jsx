@@ -53,8 +53,9 @@ const confirmationBusinesses = [];
 
 const LocallyChatArea = ({
     chatId,
-    onPrompted = () => {},
-    isSending = false
+    onPrompted = () => { },
+    isSending = false,
+    actionInProgress = {}
 }) => {
     const router = useRouter();
     const dispatch = useDispatch();
@@ -109,75 +110,70 @@ const LocallyChatArea = ({
 
                         return (
                             <div key={message.id + "_" + (index + 1)}>
-                                {message.type === "update" ? (
-                                    <div className="flex justify-center">
-                                        <div className="w-full max-w-3xl">
-                                            <UpdateMessage message={message.content} />
-                                        </div>
-                                    </div>
-                                ) : (
+                                <div
+                                    className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                                >
                                     <div
-                                        className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                                        className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${isUser
+                                            ? "bg-[#0076d7] text-white"
+                                            : "border border-[#0076d7]/20 bg-white text-slate-900"
+                                            }`}
                                     >
-                                        <div
-                                            className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${isUser
-                                                ? "bg-[#0076d7] text-white"
-                                                : "border border-[#0076d7]/20 bg-white text-slate-900"
-                                                }`}
-                                        >
-                                            {message.type && (
-                                                <p
-                                                    className={`mb-2 text-[11px] uppercase tracking-[0.2em] ${isUser ? "text-white/70" : "text-[#0076d7]"
-                                                        }`}
-                                                >
-                                                    {messageTitles[message.type] ?? message.type}
-                                                </p>
-                                            )}
-                                            {message.type === "list" && (
-                                                <ListMessage items={message.data} />
-                                            )}
-                                            {message.type === "compare" && (
-                                                <CompareMessage items={message.data} />
-                                            )}
-                                            {message.type === "geo_locate" && (
-                                                <GeoLocateMessage data={message.data} />
-                                            )}
-                                            {message.type === "confirmation" && (
-                                                <ConfirmationMessage
-                                                    message={message.data?.[0]?.content}
-                                                    onSelect={() => setIsModalOpen(true)}
-                                                />
-                                            )}
-                                            {message.type === "media" && <MediaMessage />}
-                                            {message.type === "ask_location" && (
-                                                <AskLocationMessage message={message.content} />
-                                            )}
-                                            {message.type === "info" && (
-                                                <InfoMessage data={message.data} />
-                                            )}
-                                            {(!message.type ||
-                                                ![
-                                                    "list",
-                                                    "compare",
-                                                    "geo_locate",
-                                                    "confirmation",
-                                                    "update",
-                                                    "media",
-                                                    "ask_location",
-                                                    "info"
-                                                ].includes(message.type)) &&
-                                                payload && <TextMessage text={payload} />}
-                                            {message.attachments && message.attachments.length > 0 && (
-                                                <p className="mt-2 text-xs text-white/70">
-                                                    {message.attachments.length} attachment(s)
-                                                </p>
-                                            )}
-                                        </div>
+                                        {message.type && (
+                                            <p
+                                                className={`mb-2 text-[11px] uppercase tracking-[0.2em] ${isUser ? "text-white/70" : "text-[#0076d7]"
+                                                    }`}
+                                            >
+                                                {messageTitles[message.type] ?? message.type}
+                                            </p>
+                                        )}
+                                        {message.type === "list" && (
+                                            <ListMessage items={message.data} />
+                                        )}
+                                        {message.type === "compare" && (
+                                            <CompareMessage items={message.data} />
+                                        )}
+                                        {message.type === "geo_locate" && (
+                                            <GeoLocateMessage data={message.data} />
+                                        )}
+                                        {message.type === "confirmation" && (
+                                            <ConfirmationMessage
+                                                message={message.data?.[0]?.content}
+                                                onSelect={() => setIsModalOpen(true)}
+                                            />
+                                        )}
+                                        {message.type === "media" && <MediaMessage />}
+                                        {message.type === "ask_location" && (
+                                            <AskLocationMessage message={message.content} />
+                                        )}
+                                        {message.type === "info" && (
+                                            <InfoMessage data={message.data} />
+                                        )}
+                                        {(!message.type ||
+                                            ![
+                                                "list",
+                                                "compare",
+                                                "geo_locate",
+                                                "confirmation",
+                                                "update",
+                                                "media",
+                                                "ask_location",
+                                                "info"
+                                            ].includes(message.type)) &&
+                                            payload && <TextMessage text={payload} />}
+                                        {message.attachments && message.attachments.length > 0 && (
+                                            <p className="mt-2 text-xs text-white/70">
+                                                {message.attachments.length} attachment(s)
+                                            </p>
+                                        )}
                                     </div>
-                                )}
+                                </div>
                             </div>
                         );
                     })}
+                    {actionInProgress.type === "update" ? (
+                        <UpdateMessage />
+                    ) : null}
                     {messages.length === 0 && (
                         <div className="pt-8 text-center text-sm text-slate-500">
                             I can assist you with business information and comparisons. Give it a try.
