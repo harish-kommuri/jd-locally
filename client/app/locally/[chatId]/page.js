@@ -22,6 +22,7 @@ export default function LocallyChatPage() {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const user = useSelector(userSelector());
+  const locationData = useSelector((state) => state.user.locationData);
 
   // Check for authentication on mount
   React.useEffect(() => {
@@ -48,11 +49,15 @@ export default function LocallyChatPage() {
 
       setIsLoading(true);
 
-      await streamEvents("/chat/message", {
+      const payload = {
         chat_id: chatId,
         user_id: user?.id,
-        message
-      });
+        message,
+        user_name: user?.name || '',
+        location_info: locationData
+      };
+
+      await streamEvents("/chat/message", payload);
 
     } catch (e) {
       console.log(e);

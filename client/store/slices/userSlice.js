@@ -1,10 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const defaultLocationData = {
+  city: "Hyderabad",
+  area: "Hitech City",
+  state: "Telangana",
+  pincode: "500081",
+  lat: 17.4474,
+  long: 78.3762
+};
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
     data: null,
-    selectedLocation: null
+    locationData: defaultLocationData
   },
   reducers: {
     setUser(state, action) {
@@ -13,12 +22,12 @@ const userSlice = createSlice({
     clearUser(state) {
       state.data = null;
     },
-    setSelectedLocation(state, action) {
-      state.selectedLocation = action.payload;
+    setLocationData(state, action) {
+      state.locationData = action.payload;
     }
   }
 });
 
-export const { setUser, clearUser, setSelectedLocation } = userSlice.actions;
+export const { setUser, clearUser, setLocationData } = userSlice.actions;
 
 export default userSlice.reducer;

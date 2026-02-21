@@ -153,3 +153,25 @@ def get_user_chats(user_id: str):
         })
 
     return chats
+
+def get_llm_hidden_context(user_name: str | None, location_info: dict | None) -> str | None:
+    context_parts = []
+
+    if user_name:
+        context_parts.append(f"- User's name is {user_name}.")
+    if location_info:
+        loc = location_info
+        location_str = ", ".join(filter(None, [loc["area"], loc["city"], loc["state"], loc["pincode"]]))
+        if location_str:
+            context_parts.append(f"- User's current location is {location_str}.")
+        if loc.get("lat") and loc.get("long"):
+            context_parts.append(f"- Coordinates: lat {loc['lat']}, long {loc['long']}.")
+
+    content = "\n".join(context_parts)
+    if content.strip() == "":
+        return None
+    else:
+        return f"""
+Hidden Context:
+{content}
+"""

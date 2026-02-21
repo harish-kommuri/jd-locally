@@ -12,13 +12,13 @@ tools = get_tools()
 llm_tools, status_texts, fe_binders = ollama_tools(tools)
 
 
-def generate_response(messages: list[dict], system: str | None = None) -> str:
-    payload = [{"role": "system", "content": system or SYSTEM_CONTEXT}]
+def generate_response(messages: list[dict]):
+    payload = [{"role": "system", "content": SYSTEM_CONTEXT}]
     payload.extend(messages)
 
     result = ollama.chat(
         model=MODEL_NAME,
-        messages=payload,
+        messages=messages,
         tools=llm_tools,
         options={
             "temperature": TEMPERATURE,
