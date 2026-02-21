@@ -186,7 +186,6 @@ export default function LoginModal({ isOpen, onLoginSuccess }) {
             >
               {isSubmitting ? "Verifying..." : "Verify OTP"}
             </button>
-
             <button
               type="button"
               onClick={handleBack}

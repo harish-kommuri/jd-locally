@@ -21,5 +21,5 @@ def get_user_chats_route(user_id: str):
 
 
 @router.get("/{chat_id}")
-def get_chat(chat_id: str):
-    return fetch_chat(chat_id)
+def get_chat(chat_id: str, user_id: str):
+    return fetch_chat(chat_id, user_id)

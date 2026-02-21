@@ -19,6 +19,7 @@ import UpdateMessage from "../components/messageTypes/UpdateMessage";
 import Xhr from "../utils/xhr";
 import PromptInput from "./PromptInput";
 import { setChatMessages } from "../store/slices/chatsSlice";
+import { userSelector } from "../store/selectors";
 
 const ConfirmationModal = dynamic(
     () => import("../components/ConfirmationModal"),
@@ -57,6 +58,7 @@ const LocallyChatArea = ({
 }) => {
     const router = useRouter();
     const dispatch = useDispatch();
+    const user = useSelector(userSelector());
     const messages = useSelector((state) =>
         chatId ? state.chats.messagesByChatId[chatId] ?? [] : []
     );
@@ -67,13 +69,17 @@ const LocallyChatArea = ({
 
     useEffect(() => {
         const loadChat = async () => {
-            const response = await Xhr.get(`/chat/${chatId}`);
+            if (!user?.id) {
+                router.replace("/locally/new");
+                return;
+            }
+            const response = await Xhr.get(`/chat/${chatId}?user_id=${user.id}`);
             if (!response.ok) {
                 router.replace("/locally/new");
                 return;
             }
             const data = await response.json();
-            if (!data.messages || data.messages.length === 0) {
+            if (data.error || !data.messages || data.messages.length === 0) {
                 router.replace("/locally/new");
                 return;
             }
@@ -83,7 +89,7 @@ const LocallyChatArea = ({
         if (chatId) {
             loadChat();
         }
-    }, [chatId, dispatch, router]);
+    }, [chatId, dispatch, router, user?.id]);
 
     const toggleBusiness = (businessId) => {
         setSelectedBusinesses((prev) => {

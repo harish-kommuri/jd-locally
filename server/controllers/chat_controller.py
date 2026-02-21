@@ -57,8 +57,6 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
             tool_name = call_info.function.name
             payload = call_info.function.arguments
 
-            print(tool_name, fe_binders.get(tool_name, "others"))
-
             if tool_name in status_texts:
                 yield f"data: {json.dumps({'chatId': chatid, 'data': { 'role': 'system', 'type': 'update', 'content': status_texts[tool_name] or 'Fetching data' }})}\n\n"
                 resp = call_tool(tool_name, payload)
@@ -69,11 +67,15 @@ def stream_chat(payload: ChatMessageRequest) -> Generator[str, None, None]:
 
     yield f"data: {json.dumps({**system_message, 'chat_id': chatid, 'id': str(system_message['id'])})}\n\n"
 
-def fetch_chat(chat_id: str):
+def fetch_chat(chat_id: str, user_id: str):
     chat = get_chat_thread(chat_id)
 
     if not chat:
-        return {"chat_id": chat_id, "messages": []}
+        return {"chat_id": chat_id, "messages": [], "error": "Chat not found"}
+
+    # Verify user owns this chat
+    if chat.get("user_id") != user_id:
+        return {"chat_id": chat_id, "messages": [], "error": "Unauthorized"}
 
     return chat
 
