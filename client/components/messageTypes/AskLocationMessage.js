@@ -2,9 +2,7 @@ import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Toast from "../Toast";
 
-const ManualLocationModal = dynamic(() => import("../ManualLocationModal"), {
-  ssr: false
-});
+const ManualLocationModal = dynamic(() => import("../ManualLocationModal"), { ssr: false });
 
 const TOP_CITIES = [
   "Mumbai",
@@ -65,11 +63,11 @@ export default function AskLocationMessage({ message }) {
   return (
     <div className="mt-1 space-y-3">
       <p className="text-sm text-slate-900">{message}</p>
-      {coordinates && (
+      {/* {coordinates && (
         <p className="text-xs text-slate-500">
           Detected: {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
         </p>
-      )}
+      )} */}
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -103,7 +101,7 @@ export default function AskLocationMessage({ message }) {
           className="inline-flex items-center rounded-full border border-[#0076d7] px-4 py-2 text-xs font-semibold text-[#0076d7] transition hover:bg-[#0076d7]/10"
           onClick={() => setIsModalOpen(true)}
         >
-          Enter manually
+          Select Location
         </button>
       </div>
       <Toast message={toast} onClose={() => setToast("")} />

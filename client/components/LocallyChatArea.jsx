@@ -119,14 +119,7 @@ const LocallyChatArea = ({
                                             : "border border-[#0076d7]/20 bg-white text-slate-900"
                                             }`}
                                     >
-                                        {message.type && (
-                                            <p
-                                                className={`mb-2 text-[11px] uppercase tracking-[0.2em] ${isUser ? "text-white/70" : "text-[#0076d7]"
-                                                    }`}
-                                            >
-                                                {messageTitles[message.type] ?? message.type}
-                                            </p>
-                                        )}
+                                        
                                         {message.type === "list" && (
                                             <ListMessage items={message.data} />
                                         )}
