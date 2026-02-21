@@ -29,6 +29,9 @@ def ollama_tools(tools_response: dict | list | None):
         tools = tools_response.get("tools", [])
 
     normalized = []
+    progress_texts = {}
+    fe_binders = {}
+
     for tool in tools:
         if not isinstance(tool, dict):
             continue
@@ -39,6 +42,12 @@ def ollama_tools(tools_response: dict | list | None):
 
         description = tool.get("description") or tool.get("title") or ""
         parameters = tool.get("inputSchema") or {"type": "object", "properties": {}}
+        progess_text = tool.get("progressText", "Getting Data")
+        fe_binder = tool.get("feBinder", "others")
+        progress_texts[name] = progess_text
+        fe_binders[name] = fe_binder
+
+
         if isinstance(parameters, dict) and "type" not in parameters:
             parameters = {"type": "object", **parameters}
 
@@ -53,4 +62,4 @@ def ollama_tools(tools_response: dict | list | None):
             }
         )
 
-    return normalized
+    return normalized, progress_texts, fe_binders

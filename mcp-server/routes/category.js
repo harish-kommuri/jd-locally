@@ -1,10 +1,10 @@
 import { handleCategorySearch } from "../controllers/category_controller.js";
-import { MCP_TOOL_SCHEMAS } from "../utils/mcp-schemas.js";
+import { getToolSchema } from "../utils/mcp-schemas.js";
 
 export function registerCategoryTool(server) {
   server.registerTool(
     "category_search",
-    MCP_TOOL_SCHEMAS.category_search,
+    getToolSchema("category_search"),
     async (payload) => ({
       content: [
         {

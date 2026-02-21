@@ -65,6 +65,8 @@ export default function LocallyChatPage() {
         try {
           const event = JSON.parse(jsonText);
 
+          console.log(event);
+
           if (event.data?.type === 'update') {
             dispatch(setTaskInProgress(event));
           } else {

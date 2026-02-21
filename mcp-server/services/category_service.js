@@ -42,6 +42,7 @@ const sampleBusinesses = [
 ];
 
 export function getCategoryResults({ category, sort_by }) {
+  return sampleBusinesses;
   const filtered = category
     ? sampleBusinesses.filter((item) => item.category === category)
     : sampleBusinesses;

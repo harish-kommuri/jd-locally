@@ -2,6 +2,7 @@ export const MCP_TOOL_SCHEMAS = {
   ping: {
     name: "ping",
     title: "Ping",
+    progressText: "Checking status",
     description: "Health check",
     inputSchema: {
       type: "object",
@@ -14,6 +15,8 @@ export const MCP_TOOL_SCHEMAS = {
   geo_lookup: {
     name: "geo_lookup",
     title: "Geo Lookup",
+    progressText: "Getting location",
+    feBinder: "others",
     description: "Get geographical data for a location",
     inputSchema: {
       type: "object",
@@ -30,6 +33,8 @@ export const MCP_TOOL_SCHEMAS = {
   category_search: {
     name: "category_search",
     title: "Category Search",
+    feBinder: "list",
+    progressText: "Searching businesses",
     description: "Search businesses by category with sorting options",
     inputSchema: {
       type: "object",
@@ -46,6 +51,8 @@ export const MCP_TOOL_SCHEMAS = {
   compare_businesses: {
     name: "compare_businesses",
     title: "Compare Businesses",
+    feBinder: "compare",
+    progressText: "Getting compare data",
     description: "Compare multiple businesses by ID",
     inputSchema: {
       type: "object",
@@ -61,6 +68,7 @@ export const MCP_TOOL_SCHEMAS = {
   distance_between: {
     name: "distance_between",
     title: "Distance Between",
+    progressText: "Measuring distance",
     description: "Calculate distance between two coordinates",
     inputSchema: {
       type: "object",
@@ -85,9 +93,11 @@ export const MCP_TOOL_SCHEMAS = {
       required: ["from", "to"]
     }
   },
-  business_detail: {
+   business_detail: {
     name: "business_detail",
-    title: "Business Detail",
+    title: "Business Details",
+    feBinder: "info",
+    progressText: "Getting business details",
     description: "Get detailed business info by type",
     inputSchema: {
       type: "object",
@@ -120,9 +130,17 @@ export const MCP_TOOL_SCHEMAS = {
 };
 
 export function getHttpTools() {
-  return Object.values(MCP_TOOL_SCHEMAS).map(({ name, description, inputSchema }) => ({
+  return Object.values(MCP_TOOL_SCHEMAS).map(({ name, description, progressText, inputSchema, feBinder }) => ({
     name,
+    feBinder,
     description,
+    progressText,
     inputSchema
   }));
+}
+
+export function getToolSchema(schemaName) {
+  const schema = { ...(MCP_TOOL_SCHEMAS[schemaName] || {}) };
+  delete schema.progressText;
+  return schema;
 }

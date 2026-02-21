@@ -9,9 +9,7 @@ TOP_P = 0.9
 
 tools = get_tools()
 
-llm_tools = ollama_tools(tools)
-
-print(llm_tools)
+llm_tools, status_texts, fe_binders = ollama_tools(tools)
 
 
 def generate_response(messages: list[dict], system: str | None = None) -> str:
@@ -21,15 +19,12 @@ def generate_response(messages: list[dict], system: str | None = None) -> str:
     result = ollama.chat(
         model=MODEL_NAME,
         messages=payload,
-        # tools=tools,
+        tools=llm_tools,
         options={
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
         },
     )
 
-    tool_calls = result["message"].get("tool_calls")
-    if tool_calls:
-        print("Tool calls:", tool_calls)
-
-    return result["message"]["content"]
+    tool_calls = result["message"].get("tool_calls", [])
+    return result["message"]["content"], tool_calls, status_texts, fe_binders

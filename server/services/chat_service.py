@@ -60,7 +60,7 @@ def create_chat_thread(user_id: str, message: str):
     return chat_id
 
 
-def append_message(chat_id: str, role: str, content: str, message_type: str | None = None):
+def append_message(chat_id: str, role: str, content: str, mcp_data = {}, message_type: str | None = None):
     message = {"role": role, "id": ObjectId()}
 
     # Try to parse content as JSON
@@ -77,6 +77,8 @@ def append_message(chat_id: str, role: str, content: str, message_type: str | No
 
     if message_type and "type" not in message:
         message["type"] = message_type
+    
+    message['mcp_data'] = mcp_data
 
     get_collection("chats").update_one(
         {"_id": ObjectId(chat_id)},

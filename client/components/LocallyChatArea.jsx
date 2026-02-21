@@ -26,15 +26,14 @@ const ConfirmationModal = dynamic(
 );
 
 const formatPayload = (message) => {
+    const returnable = {};
     if (message.content) {
-        return message.content;
+        returnable.content = message.content;
     }
+    returnable.data = message.data || [];
+    returnable.mcp_data = message.mcp_data || { fe_binder: "others" };
 
-    if (message.data) {
-        return JSON.stringify(message.data, null, 2);
-    }
-
-    return "";
+    return returnable;
 };
 
 const messageTitles = {
@@ -107,6 +106,7 @@ const LocallyChatArea = ({
                     {messages.map((message, index) => {
                         const isUser = message.role.toLowerCase() === "user";
                         const payload = formatPayload(message);
+                        const binderType = payload.mcp_data.fe_binder || "others";
 
                         return (
                             <div key={message.id + "_" + (index + 1)}>
@@ -120,29 +120,29 @@ const LocallyChatArea = ({
                                             }`}
                                     >
                                         
-                                        {message.type === "list" && (
-                                            <ListMessage items={message.data} />
+                                        {binderType === "list" && (
+                                            <ListMessage mcpData={payload.mcp_data} />
                                         )}
-                                        {message.type === "compare" && (
+                                        {binderType === "compare" && (
                                             <CompareMessage items={message.data} />
                                         )}
-                                        {message.type === "geo_locate" && (
+                                        {binderType === "geo_locate" && (
                                             <GeoLocateMessage data={message.data} />
                                         )}
-                                        {message.type === "confirmation" && (
+                                        {binderType === "confirmation" && (
                                             <ConfirmationMessage
                                                 message={message.data?.[0]?.content}
                                                 onSelect={() => setIsModalOpen(true)}
                                             />
                                         )}
-                                        {message.type === "media" && <MediaMessage />}
-                                        {message.type === "ask_location" && (
+                                        {binderType === "media" && <MediaMessage />}
+                                        {binderType === "ask_location" && (
                                             <AskLocationMessage message={message.content} />
                                         )}
-                                        {message.type === "info" && (
+                                        {binderType === "info" && (
                                             <InfoMessage data={message.data} />
                                         )}
-                                        {(!message.type ||
+                                        {(!binderType ||
                                             ![
                                                 "list",
                                                 "compare",
@@ -152,11 +152,11 @@ const LocallyChatArea = ({
                                                 "media",
                                                 "ask_location",
                                                 "info"
-                                            ].includes(message.type)) &&
+                                            ].includes(binderType)) &&
                                             payload ? (
                                             <>
-                                                <TextMessage text={payload} />
-                                                {message.data && message.data.length > 0 && (
+                                                <TextMessage text={payload.content} />
+                                                {/* {message.data && message.data.length > 0 && (
                                                     <div className="mt-3 flex flex-wrap gap-2">
                                                         {message.data.map((rec, idx) => (
                                                             <button
@@ -170,7 +170,7 @@ const LocallyChatArea = ({
                                                             </button>
                                                         ))}
                                                     </div>
-                                                )}
+                                                )} */}
                                             </>
                                         ) : null}
 
@@ -185,7 +185,7 @@ const LocallyChatArea = ({
                         );
                     })}
                     {actionInProgress.type === "update" ? (
-                        <UpdateMessage />
+                        <UpdateMessage message={actionInProgress.content} />
                     ) : null}
                     {messages.length === 0 && (
                         <div className="pt-8 text-center text-sm text-slate-500">

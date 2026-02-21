@@ -1,12 +1,10 @@
-export default function ListMessage({ items }) {
-  if (!Array.isArray(items)) {
-    return null;
-  }
+export default function ListMessage({ mcpData = {} }) {
+  const items = mcpData.data?.result || [];
 
   return (
     <div className="-mx-2 mt-1">
       <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-2">
-        {items.map((item) => (
+        {items.length > 0 ? items.map((item) => (
           <div
             key={item.id}
             className="min-w-[220px] snap-start rounded-xl border border-[#0076d7]/20 bg-white p-4 shadow-sm"
@@ -36,7 +34,7 @@ export default function ListMessage({ items }) {
               </button>
             </div>
           </div>
-        ))}
+        )) : "Sorry. We chould not find any results. :("}
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
-import { MCP_TOOL_SCHEMAS } from "../utils/mcp-schemas.js";
+import { getToolSchema } from "../utils/mcp-schemas.js";
 
 export function registerPingTool(server) {
   server.registerTool(
     "ping",
-    MCP_TOOL_SCHEMAS.ping,
+    getToolSchema("ping"),
     async (payload) => ({
       content: [
         {
