@@ -5,10 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import LocallySidebar from "../../../components/LocallySidebar";
 import NewChat from "../../../components/NewChat";
 import LocallyChatArea from "../../../components/LocallyChatArea";
+import LoginModal from "../../../components/LoginModal";
 import { useDispatch, useSelector } from "react-redux";
 import { addChatMessage, setTaskInProgress, incrementChatListVersion } from "../../../store/slices/chatsSlice";
 import Xhr from "../../../utils/xhr";
 import { userSelector } from "../../../store/selectors";
+import { getCookie } from "../../../utils/cookies";
+import { setUser } from "../../../store/slices/userSlice";
 
 export default function LocallyChatPage() {
   const params = useParams();
@@ -16,7 +19,28 @@ export default function LocallyChatPage() {
   const chatId = params?.chatId;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const user = useSelector(userSelector());
+
+  // Check for authentication on mount
+  React.useEffect(() => {
+    const userProfileCookie = getCookie("userprofile");
+    if (userProfileCookie) {
+      try {
+        const userProfile = JSON.parse(userProfileCookie);
+        setIsAuthenticated(true);
+        dispatch(setUser(userProfile));
+      } catch (e) {
+        // Invalid cookie, ignore
+      }
+    }
+    setIsCheckingAuth(false);
+  }, [dispatch]);
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
 
   const sendPrompt = async (message = '') => {
     try {
@@ -94,17 +118,37 @@ export default function LocallyChatPage() {
     }
   };
 
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <section className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-pulse text-slate-500">Loading...</div>
+      </section>
+    );
+  }
+
   return (
-    <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
-      <LocallySidebar />
-      {chatId === 'new' ? (
-        <NewChat
-          isLoading={isLoading}
-          onPrompted={sendPrompt}
-        />
-      ) : (
-        <LocallyChatArea chatId={chatId} isSending={isLoading} onPrompted={sendPrompt} />
+    <>
+      {/* Login Modal - shown when not authenticated */}
+      <LoginModal
+        isOpen={!isAuthenticated}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Main Content - shown when authenticated */}
+      {isAuthenticated && (
+        <section className="min-h-screen bg-white grid grid-cols-1 grid-cols-[320px_1fr]">
+          <LocallySidebar />
+          {chatId === 'new' ? (
+            <NewChat
+              isLoading={isLoading}
+              onPrompted={sendPrompt}
+            />
+          ) : (
+            <LocallyChatArea chatId={chatId} isSending={isLoading} onPrompted={sendPrompt} />
+          )}
+        </section>
       )}
-    </section>
+    </>
   );
 }

@@ -73,7 +73,7 @@ export default function LocallySidebar() {
             {user ? (
               <>
                 <span className="text-sm font-semibold text-slate-900">{user.name}</span>
-                <span className="text-xs text-slate-500">{user.id}</span>
+                <span className="text-xs text-slate-500">{user.mobile}</span>
               </>
             ) : (
               <Link
