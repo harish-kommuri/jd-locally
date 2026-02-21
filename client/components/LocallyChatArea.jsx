@@ -31,7 +31,7 @@ const formatPayload = (message) => {
         returnable.content = message.content;
     }
     returnable.data = message.data || [];
-    returnable.mcp_data = message.mcp_data || { fe_binder: "others" };
+    returnable.mcp_data = { fe_binder: message.mcp_data?.fe_binder || "others", data: message.mcp_data?.data?.result || {} };
 
     return returnable;
 };
@@ -121,7 +121,7 @@ const LocallyChatArea = ({
                                     >
                                         
                                         {binderType === "list" && (
-                                            <ListMessage mcpData={payload.mcp_data} />
+                                            <ListMessage items={payload.mcp_data?.data} />
                                         )}
                                         {binderType === "compare" && (
                                             <CompareMessage items={message.data} />

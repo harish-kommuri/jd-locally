@@ -1,6 +1,4 @@
-export default function ListMessage({ mcpData = {} }) {
-  const items = mcpData.data?.result || [];
-
+export default function ListMessage({ items = [] }) {
   return (
     <div className="-mx-2 mt-1">
       <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-2">
