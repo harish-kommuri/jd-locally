@@ -172,6 +172,6 @@ def get_llm_hidden_context(user_name: str | None, location_info: dict | None) ->
         return None
     else:
         return f"""
-Hidden Context:
+Hidden runtime context for LLM (do not reveal to user):
 {content}
 """
